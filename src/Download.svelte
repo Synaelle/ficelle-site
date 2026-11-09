@@ -56,12 +56,17 @@
     href: string
     untested?: boolean
   }
-  const items: Item[] = $derived([
+  const all: Item[] = $derived([
     { system: 'windows', kind: 'Installer', version, href: link(files?.installer) },
     { system: 'windows', kind: 'Portable', version, href: link(files?.portable) },
     { system: 'mac', kind: 'Disk image', version: MAC_VERSION, href: MAC_DMG, untested: true },
     { system: 'linux', kind: 'AppImage', version, href: link(files?.appImage) },
     { system: 'android', kind: 'APK', version, href: link(files?.apk) },
+  ])
+  // the visitor's own system first, the others in their usual order
+  const items = $derived([
+    ...all.filter((i) => i.system === system),
+    ...all.filter((i) => i.system !== system),
   ])
 
   const main = $derived.by(() => {
@@ -110,8 +115,20 @@
     </button>
   </div>
 
-  {#if !system}
-    <p class="unknown">Your system could not be detected, or Ficelle does not support it yet.</p>
+  {#if system === 'android'}
+    <a class="obtainium" href={OBTAINIUM}>
+      <img
+        src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
+        alt="Get it on Obtainium"
+        height="56"
+      />
+    </a>
+  {:else if system === 'mac'}
+    <p class="note">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</p>
+  {:else if system === 'linux'}
+    <p class="note">Packages for Debian, Fedora, the AUR and Flathub are coming soon.</p>
+  {:else if !system}
+    <p class="note">Your system could not be detected, or Ficelle does not support it yet.</p>
   {/if}
 
   {#if open}
@@ -131,17 +148,6 @@
           </li>
         {/each}
       </ul>
-      <div class="foot">
-        <span class="mac">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</span
-        >
-        <a class="badge" href={OBTAINIUM}>
-          <img
-            src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
-            alt="Get it on Obtainium"
-            height="36"
-          />
-        </a>
-      </div>
     </div>
   {/if}
 </div>
@@ -227,10 +233,18 @@
   .flipped {
     transform: rotate(180deg);
   }
-  .unknown {
+  .note {
     margin: 0;
+    max-width: 44ch;
     color: var(--color-text-muted);
-    font-size: 14px;
+    font-size: 15px;
+  }
+  .obtainium {
+    display: block;
+    border-radius: var(--radius-control);
+  }
+  .obtainium img {
+    display: block;
   }
 
   .menu {
@@ -298,22 +312,6 @@
     width: 18px;
     height: 18px;
   }
-  .foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border-top: 1px solid var(--color-border);
-  }
-  .mac {
-    color: var(--color-text-muted);
-    font-size: 13px;
-  }
-  .badge img {
-    display: block;
-  }
 
   /* phones: one column of full width buttons, easy to reach with a thumb */
   @media (max-width: 560px) {
@@ -348,7 +346,9 @@
     .tag {
       display: none;
     }
-    .unknown {
+    .note,
+    .obtainium {
+      justify-self: center;
       text-align: center;
     }
   }
