@@ -1,0 +1,11 @@
+[Unit]
+Description=Update the Ficelle website to its newest image
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ficelle-site
+ExecStart=/usr/bin/docker compose pull --quiet
+ExecStart=/usr/bin/docker compose up -d --remove-orphans
+ExecStart=/usr/bin/docker image prune -f --filter label=org.opencontainers.image.source=https://github.com/Synaelle/ficelle-site
