@@ -2,6 +2,8 @@
 // Which system the visitor is on, and the files of the latest release for it.
 
 export type System = 'windows' | 'mac' | 'linux' | 'android'
+/** Where the visitor may be: a system with a build, or iOS, which has none. */
+export type Seen = System | 'ios'
 
 export const REPO = 'https://github.com/Synaelle/ficelle'
 export const LATEST_PAGE = `${REPO}/releases/latest`
@@ -11,7 +13,7 @@ export const MAC_DMG = `${REPO}/releases/download/v${MAC_VERSION}/Ficelle_${MAC_
 export const MAC_DOC = `${REPO}/blob/main/docs/mac.md`
 export const OBTAINIUM = `https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/${REPO}`
 
-interface Seen {
+interface Browser {
   userAgent: string
   /** navigator.userAgentData.platform where the browser has it */
   platform?: string
@@ -19,40 +21,40 @@ interface Seen {
 }
 
 /**
- * The system to offer first, or null when Ficelle has no build for it
- * (iPhone, iPad, ChromeOS) or it cannot be told.
+ * The system to offer first, iOS (which has no build), or null when Ficelle
+ * has no build for it (ChromeOS) or it cannot be told.
  */
 export function detectSystem({
   userAgent,
   platform = '',
   maxTouchPoints = 0,
-}: Seen): System | null {
+}: Browser): Seen | null {
   const ua = userAgent
   const hint = platform.toLowerCase()
   // Android says Linux too, so it comes first
   if (hint === 'android' || /Android/i.test(ua)) return 'android'
-  if (/iPhone|iPad|iPod/.test(ua)) return null
+  if (/iPhone|iPad|iPod/.test(ua)) return 'ios'
   if (hint === 'chrome os' || /CrOS/.test(ua)) return null
   if (hint === 'windows' || /Windows/.test(ua)) return 'windows'
   if (hint === 'macos' || /Macintosh|Mac OS X/.test(ua)) {
     // an iPad asks for the desktop page and says Mac, but it has touch
-    return maxTouchPoints > 1 ? null : 'mac'
+    return maxTouchPoints > 1 ? 'ios' : 'mac'
   }
   if (hint === 'linux' || /Linux|X11/.test(ua)) return 'linux'
   return null
 }
 
-const SYSTEMS: readonly System[] = ['windows', 'mac', 'linux', 'android']
+const SEEN: readonly Seen[] = ['windows', 'mac', 'linux', 'android', 'ios']
 
 /**
  * The system asked for in the address, `?os=windows` (or `mac`, `linux`,
- * `android`, `none` for one that is not detected), to see the page as it
- * shows there. Undefined when the address asks for nothing.
+ * `android`, `ios`, `none` for one that is not detected), to see the page as
+ * it shows there. Undefined when the address asks for nothing.
  */
-export function systemFromAddress(search: string): System | null | undefined {
+export function systemFromAddress(search: string): Seen | null | undefined {
   const asked = new URLSearchParams(search).get('os')
   if (asked === null) return undefined
-  return SYSTEMS.find((s) => s === asked) ?? null
+  return SEEN.find((s) => s === asked) ?? null
 }
 
 export interface Files {

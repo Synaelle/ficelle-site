@@ -31,10 +31,13 @@ describe('detectSystem', () => {
     expect(detectSystem({ userAgent: UA.linux, platform: 'Android' })).toBe('android')
   })
 
+  it('tells iPhones and iPads apart, the iPad even when it says Mac', () => {
+    expect(detectSystem({ userAgent: UA.iphone })).toBe('ios')
+    expect(detectSystem({ userAgent: UA.mac, maxTouchPoints: 5 })).toBe('ios')
+  })
+
   it('offers nothing where there is no build', () => {
-    expect(detectSystem({ userAgent: UA.iphone })).toBeNull()
     expect(detectSystem({ userAgent: UA.chromeos })).toBeNull()
-    expect(detectSystem({ userAgent: UA.mac, maxTouchPoints: 5 })).toBeNull()
     expect(detectSystem({ userAgent: 'curl/8.0' })).toBeNull()
   })
 })
@@ -67,6 +70,7 @@ describe('systemFromAddress', () => {
   it('reads ?os= to show the page as another system sees it', () => {
     expect(systemFromAddress('?os=windows')).toBe('windows')
     expect(systemFromAddress('?os=android&x=1')).toBe('android')
+    expect(systemFromAddress('?os=ios')).toBe('ios')
     expect(systemFromAddress('?os=none')).toBeNull()
     expect(systemFromAddress('?os=amiga')).toBeNull()
     expect(systemFromAddress('')).toBeUndefined()
