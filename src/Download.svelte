@@ -129,11 +129,13 @@
 <style>
   .download {
     display: grid;
+    justify-items: center;
     gap: var(--space-3);
   }
   .row {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--space-3);
   }
   .split {
@@ -214,7 +216,8 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-popover);
     background: var(--color-surface);
-    max-width: 560px;
+    width: min(560px, 100%);
+    text-align: left;
   }
   .systems li {
     display: grid;
