@@ -375,6 +375,7 @@
     .more {
       padding: 0 var(--space-4);
     }
+    .other,
     .web {
       padding: var(--space-3) var(--space-4);
     }
