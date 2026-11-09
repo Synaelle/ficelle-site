@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest'
-import { detectSystem, filesOf } from './download'
+import { detectSystem, filesOf, systemFromAddress } from './download'
 
 const UA = {
   windows:
@@ -60,5 +60,15 @@ describe('filesOf', () => {
       appImage: 'https://x/Ficelle_0.5.1_amd64.AppImage',
       apk: 'https://x/ficelle-0.5.1-android.apk',
     })
+  })
+})
+
+describe('systemFromAddress', () => {
+  it('reads ?os= to show the page as another system sees it', () => {
+    expect(systemFromAddress('?os=windows')).toBe('windows')
+    expect(systemFromAddress('?os=android&x=1')).toBe('android')
+    expect(systemFromAddress('?os=none')).toBeNull()
+    expect(systemFromAddress('?os=amiga')).toBeNull()
+    expect(systemFromAddress('')).toBeUndefined()
   })
 })

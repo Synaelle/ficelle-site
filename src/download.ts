@@ -42,6 +42,19 @@ export function detectSystem({
   return null
 }
 
+const SYSTEMS: readonly System[] = ['windows', 'mac', 'linux', 'android']
+
+/**
+ * The system asked for in the address, `?os=windows` (or `mac`, `linux`,
+ * `android`, `none` for one that is not detected), to see the page as it
+ * shows there. Undefined when the address asks for nothing.
+ */
+export function systemFromAddress(search: string): System | null | undefined {
+  const asked = new URLSearchParams(search).get('os')
+  if (asked === null) return undefined
+  return SYSTEMS.find((s) => s === asked) ?? null
+}
+
 export interface Files {
   version: string
   installer?: string

@@ -5,6 +5,8 @@
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
   import download from 'lucide-static/icons/download.svg?raw'
   import globe from 'lucide-static/icons/globe.svg?raw'
+  import { slide } from 'svelte/transition'
+  import { cubicOut } from 'svelte/easing'
   import {
     detectSystem,
     latestFiles,
@@ -13,24 +15,32 @@
     MAC_DOC,
     MAC_VERSION,
     OBTAINIUM,
+    systemFromAddress,
     type Files,
     type System,
   } from './download'
 
   const seen = navigator as Navigator & { userAgentData?: { platform?: string } }
-  const system: System | null = detectSystem({
-    userAgent: navigator.userAgent,
-    platform: seen.userAgentData?.platform,
-    maxTouchPoints: navigator.maxTouchPoints,
-  })
+  const asked = systemFromAddress(location.search)
+  const system: System | null =
+    asked !== undefined
+      ? asked
+      : detectSystem({
+          userAgent: navigator.userAgent,
+          platform: seen.userAgentData?.platform,
+          maxTouchPoints: navigator.maxTouchPoints,
+        })
 
   let files = $state<Files | null>(null)
   let open = $state(false)
   latestFiles().then((found) => (files = found))
 
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const opening = { duration: still ? 0 : 220, easing: cubicOut }
+
   // until GitHub answers, or if it does not, every link goes to the release page
   const link = (url: string | undefined) => url ?? LATEST_PAGE
-  const version = $derived(files?.version ? ` ${files.version}` : '')
+  const version = $derived(files?.version ?? '')
 
   const NAMES: Record<System, string> = {
     windows: 'Windows',
@@ -39,16 +49,31 @@
     android: 'Android',
   }
 
+  interface Item {
+    system: System
+    kind: string
+    version: string
+    href: string
+    untested?: boolean
+  }
+  const items: Item[] = $derived([
+    { system: 'windows', kind: 'Installer', version, href: link(files?.installer) },
+    { system: 'windows', kind: 'Portable', version, href: link(files?.portable) },
+    { system: 'mac', kind: 'Disk image', version: MAC_VERSION, href: MAC_DMG, untested: true },
+    { system: 'linux', kind: 'AppImage', version, href: link(files?.appImage) },
+    { system: 'android', kind: 'APK', version, href: link(files?.apk) },
+  ])
+
   const main = $derived.by(() => {
     switch (system) {
       case 'windows':
-        return { href: link(files?.installer), detail: `Installer${version}` }
+        return { href: link(files?.installer), detail: `Installer ${version}` }
       case 'mac':
         return { href: MAC_DMG, detail: `Disk image ${MAC_VERSION}, untested` }
       case 'linux':
-        return { href: link(files?.appImage), detail: `AppImage${version}` }
+        return { href: link(files?.appImage), detail: `AppImage ${version}` }
       case 'android':
-        return { href: link(files?.apk), detail: `APK${version}` }
+        return { href: link(files?.apk), detail: `APK ${version}` }
       default:
         return { href: LATEST_PAGE, detail: 'Every system, on GitHub' }
     }
@@ -63,7 +88,7 @@
         <span class="text">
           <span class="label">{system ? `Download for ${NAMES[system]}` : 'See all downloads'}</span
           >
-          <span class="detail">{main.detail}</span>
+          <span class="detail">{main.detail.trim()}</span>
         </span>
       </a>
       <button
@@ -73,7 +98,7 @@
         aria-controls="systems"
         onclick={() => (open = !open)}
       >
-        <span class="icon" class:flipped={open}>{@html chevron}</span>
+        <span class="icon chevron" class:flipped={open}>{@html chevron}</span>
       </button>
     </div>
     <button class="web" disabled title="Coming later">
@@ -90,39 +115,34 @@
   {/if}
 
   {#if open}
-    <ul id="systems" class="systems">
-      <li>
-        <span class="name">Windows</span>
-        <span class="files">
-          <a href={link(files?.installer)}>Installer</a>
-          <a href={link(files?.portable)}>Portable</a>
-        </span>
-      </li>
-      <li>
-        <span class="name">macOS</span>
-        <span class="files">
-          <a href={MAC_DMG}>Disk image <span class="mono">{MAC_VERSION}</span></a>
-          <span class="note">Untested, see <a href={MAC_DOC}>Ficelle on a Mac</a></span>
-        </span>
-      </li>
-      <li>
-        <span class="name">Linux</span>
-        <span class="files"><a href={link(files?.appImage)}>AppImage</a></span>
-      </li>
-      <li>
-        <span class="name">Android</span>
-        <span class="files">
-          <a href={link(files?.apk)}>APK</a>
-          <a class="badge" href={OBTAINIUM}>
-            <img
-              src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
-              alt="Get it on Obtainium"
-              height="40"
-            />
-          </a>
-        </span>
-      </li>
-    </ul>
+    <div id="systems" class="menu" transition:slide={opening}>
+      <ul>
+        {#each items as item (item.system + item.kind)}
+          <li>
+            <a class="item" class:current={item.system === system} href={item.href}>
+              <span class="system">{NAMES[item.system]}</span>
+              <span class="kind">
+                {item.kind}
+                {#if item.untested}<span class="tag">Untested</span>{/if}
+              </span>
+              <span class="version">{item.version}</span>
+              <span class="icon">{@html download}</span>
+            </a>
+          </li>
+        {/each}
+      </ul>
+      <div class="foot">
+        <span class="mac">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</span
+        >
+        <a class="badge" href={OBTAINIUM}>
+          <img
+            src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
+            alt="Get it on Obtainium"
+            height="36"
+          />
+        </a>
+      </div>
+    </div>
   {/if}
 </div>
 
@@ -196,11 +216,13 @@
   }
   .icon {
     display: flex;
-    transition: transform var(--dur-fast) var(--ease-out);
   }
   .icon :global(svg) {
     width: 20px;
     height: 20px;
+  }
+  .chevron {
+    transition: transform var(--dur-base) var(--ease-out);
   }
   .flipped {
     transform: rotate(180deg);
@@ -210,51 +232,87 @@
     color: var(--color-text-muted);
     font-size: 14px;
   }
-  .systems {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+
+  .menu {
+    width: min(480px, 100%);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-popover);
     background: var(--color-surface);
-    width: min(560px, 100%);
     text-align: left;
+    overflow: hidden;
   }
-  .systems li {
+  .menu ul {
+    margin: 0;
+    padding: var(--space-1);
+    list-style: none;
+  }
+  .item {
     display: grid;
-    grid-template-columns: 96px 1fr;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    align-items: start;
+    grid-template-columns: 84px 1fr auto 20px;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-left: 2px solid transparent;
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out);
   }
-  .systems li + li {
-    border-top: 1px solid var(--color-border);
+  .item:hover,
+  .item:focus-visible {
+    background: var(--color-surface-2);
   }
-  .name {
+  .item.current {
+    border-left-color: var(--color-accent);
+  }
+  .system {
+    font-weight: 700;
+  }
+  .kind {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     color: var(--color-text-muted);
+    font-weight: 550;
   }
-  .files {
+  .tag {
+    padding: 0 var(--space-1);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .version {
+    color: var(--color-text-faint);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .item .icon {
+    color: var(--color-text-faint);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .item:hover .icon {
+    color: var(--color-accent);
+  }
+  .item .icon :global(svg) {
+    width: 18px;
+    height: 18px;
+  }
+  .foot {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2) var(--space-4);
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
   }
-  .note {
-    flex-basis: 100%;
+  .mac {
     color: var(--color-text-muted);
     font-size: 13px;
   }
-  .badge {
-    flex-basis: 100%;
-    display: block;
-    width: fit-content;
-  }
   .badge img {
     display: block;
-  }
-  .mono {
-    font-family: var(--font-mono);
-    font-size: 13px;
   }
 
   /* phones: one column of full width buttons, easy to reach with a thumb */
@@ -276,6 +334,19 @@
     }
     .web {
       padding: var(--space-3) var(--space-4);
+    }
+    .menu {
+      width: 100%;
+    }
+    .item {
+      grid-template-columns: 72px 1fr auto 20px;
+    }
+    .kind {
+      white-space: nowrap;
+    }
+    /* the note under the menu says it */
+    .tag {
+      display: none;
     }
     .unknown {
       text-align: center;
