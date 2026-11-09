@@ -12,9 +12,9 @@
     detectSystem,
     latestFiles,
     LATEST_PAGE,
-    MAC_DMG,
+    MAC_FALLBACK_DMG,
+    MAC_FALLBACK_VERSION,
     MAC_DOC,
-    MAC_VERSION,
     OBTAINIUM,
     systemFromAddress,
     type Files,
@@ -46,6 +46,12 @@
   // until GitHub answers, or if it does not, every link goes to the release page
   const link = (url: string | undefined) => url ?? LATEST_PAGE
   const version = $derived(files?.version ?? '')
+  // the latest release's Mac file, else the last one that had one
+  const mac = $derived(
+    files?.dmg
+      ? { href: files.dmg, version }
+      : { href: MAC_FALLBACK_DMG, version: MAC_FALLBACK_VERSION },
+  )
 
   const NAMES: Record<System, string> = {
     windows: 'Windows',
@@ -72,8 +78,8 @@
     },
     {
       system: 'mac',
-      version: MAC_VERSION,
-      files: [{ kind: t.diskImage, href: MAC_DMG }],
+      version: mac.version,
+      files: [{ kind: t.diskImage, href: mac.href }],
       untested: true,
     },
     { system: 'linux', version, files: [{ kind: 'AppImage', href: link(files?.appImage) }] },
@@ -91,7 +97,7 @@
       case 'windows':
         return { href: link(files?.installer), detail: `${t.installer} ${version}` }
       case 'mac':
-        return { href: MAC_DMG, detail: t.macDetail(MAC_VERSION) }
+        return { href: mac.href, detail: t.macDetail(mac.version) }
       case 'linux':
         return { href: link(files?.appImage), detail: `AppImage ${version}` }
       case 'android':
