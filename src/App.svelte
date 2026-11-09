@@ -6,12 +6,44 @@
   import { REPO } from './download'
 
   const base = import.meta.env.BASE_URL
+  const SIZE = 128
+
+  // the knot ties itself a moment after the page shows, so it is seen, and
+  // again under the pointer once it has finished
+  // the tie lasts 760 ms (Knot.svelte), a timer is surer than its end event,
+  // which a hidden tab never sends
+  const TIE_MS = 800
+  let shown = $state(false)
+  let round = $state(0)
+  let tying = true
+  setTimeout(() => {
+    shown = true
+    setTimeout(() => (tying = false), TIE_MS)
+  }, 600)
+  function again() {
+    if (tying) return
+    tying = true
+    round++
+    setTimeout(() => (tying = false), TIE_MS)
+  }
 </script>
 
 <main>
   <section class="intro">
     <!-- the app's unlock screen knot, tying itself -->
-    <Knot motion="tie" size={128} />
+    <div
+      class="mark"
+      style:width="{SIZE}px"
+      style:height="{SIZE}px"
+      onpointerenter={again}
+      aria-hidden="true"
+    >
+      {#if shown}
+        {#key round}
+          <Knot motion="tie" size={SIZE} />
+        {/key}
+      {/if}
+    </div>
     <h1>Ficelle</h1>
     <p class="lead">A lightweight, private notes app for your computer and your phone.</p>
     <Download />
@@ -49,6 +81,10 @@
     justify-items: center;
     text-align: center;
     padding: var(--space-7) 0;
+  }
+  .mark {
+    display: grid;
+    place-items: center;
   }
   h1 {
     margin: var(--space-4) 0 0;
