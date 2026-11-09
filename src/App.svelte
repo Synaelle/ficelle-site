@@ -3,9 +3,10 @@
   import github from '@phosphor-icons/core/assets/regular/github-logo.svg?raw'
   import Knot from '@app/ui/Knot.svelte'
   import Download from './Download.svelte'
+  import desktopShot from './screens/desktop.png'
+  import phoneShot from './screens/phone.png'
   import { REPO } from './download'
 
-  const base = import.meta.env.BASE_URL
   const SIZE = 128
 
   // the knot ties itself a moment after the page shows, so it is seen, and
@@ -55,18 +56,12 @@
   <section class="screens" aria-label="Screenshots">
     <img
       class="desktop"
-      src="{base}screens/desktop.png"
+      src={desktopShot}
       alt="Ficelle on a computer, a note with a checklist, a callout and a cat, beside the list of notes"
       width="1280"
       height="800"
     />
-    <img
-      class="phone"
-      src="{base}screens/phone.png"
-      alt="The same note on a phone"
-      width="1080"
-      height="2400"
-    />
+    <img class="phone" src={phoneShot} alt="The same note on a phone" width="1080" height="2400" />
   </section>
 </main>
 
