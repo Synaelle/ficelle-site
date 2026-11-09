@@ -125,8 +125,8 @@
       <a class="other" href={OBTAINIUM}>
         <span class="icon">{@html obtainium}</span>
         <span class="text">
-          <span class="detail">Get it on</span>
-          <span class="label">Obtainium</span>
+          <span class="label">Get it on Obtainium</span>
+          <span class="detail">Automatic updates</span>
         </span>
       </a>
     {/if}
