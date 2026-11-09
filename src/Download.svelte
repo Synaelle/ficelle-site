@@ -5,6 +5,7 @@
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
   import download from 'lucide-static/icons/download.svg?raw'
   import globe from 'lucide-static/icons/globe.svg?raw'
+  import obtainium from './obtainium.svg?raw'
   import { slide } from 'svelte/transition'
   import { cubicOut } from 'svelte/easing'
   import {
@@ -120,6 +121,15 @@
         <span class="icon chevron" class:flipped={open}>{@html chevron}</span>
       </button>
     </div>
+    {#if system === 'android'}
+      <a class="other" href={OBTAINIUM}>
+        <span class="icon">{@html obtainium}</span>
+        <span class="text">
+          <span class="detail">Get it on</span>
+          <span class="label">Obtainium</span>
+        </span>
+      </a>
+    {/if}
     <button class="web" disabled title="Coming later">
       <span class="icon">{@html globe}</span>
       <span class="text">
@@ -129,15 +139,7 @@
     </button>
   </div>
 
-  {#if system === 'android'}
-    <a class="obtainium" href={OBTAINIUM}>
-      <img
-        src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
-        alt="Get it on Obtainium"
-        height="56"
-      />
-    </a>
-  {:else if system === 'mac'}
+  {#if system === 'mac'}
     <p class="note">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</p>
   {:else if system === 'linux'}
     <p class="note">Packages for Debian, Fedora, the AUR and Flathub are coming soon.</p>
@@ -192,6 +194,7 @@
   }
   .main,
   .more,
+  .other,
   .web {
     display: flex;
     align-items: center;
@@ -220,6 +223,15 @@
   }
   .more:hover {
     background: var(--color-accent-pressed);
+  }
+  .other {
+    padding: var(--space-3) var(--space-5);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .other:hover {
+    border-color: var(--color-text-muted);
   }
   .web {
     padding: var(--space-3) var(--space-5);
@@ -261,13 +273,6 @@
     max-width: 60ch;
     color: var(--color-text-muted);
     font-size: 15px;
-  }
-  .obtainium {
-    display: block;
-    border-radius: var(--radius-control);
-  }
-  .obtainium img {
-    display: block;
   }
 
   .menu {
@@ -379,8 +384,7 @@
     .item {
       grid-template-columns: 80px 1fr auto;
     }
-    .note,
-    .obtainium {
+    .note {
       justify-self: center;
       text-align: center;
     }
