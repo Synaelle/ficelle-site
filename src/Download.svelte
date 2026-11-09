@@ -186,12 +186,13 @@
     text-align: left;
   }
   .label {
-    font-weight: 650;
+    font-weight: 750;
     line-height: 1.3;
   }
   .detail {
     font-size: 13px;
-    opacity: 0.85;
+    font-weight: 550;
+    opacity: 0.9;
   }
   .icon {
     display: flex;
@@ -254,5 +255,30 @@
   .mono {
     font-family: var(--font-mono);
     font-size: 13px;
+  }
+
+  /* phones: one column of full width buttons, easy to reach with a thumb */
+  @media (max-width: 560px) {
+    .download {
+      width: 100%;
+      justify-items: stretch;
+    }
+    .row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .main {
+      flex: 1;
+      padding: var(--space-4);
+    }
+    .more {
+      padding: 0 var(--space-4);
+    }
+    .web {
+      padding: var(--space-3) var(--space-4);
+    }
+    .unknown {
+      text-align: center;
+    }
   }
 </style>
