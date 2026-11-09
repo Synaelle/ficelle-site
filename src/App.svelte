@@ -56,14 +56,14 @@
     <img
       class="desktop"
       src="{base}screens/desktop.png"
-      alt="Ficelle on a computer, a note with headings, a task list and a table, beside the list of notes"
+      alt="Ficelle on a computer, a note with a checklist, a callout and a picture of a cat, beside the list of notes"
       width="1280"
       height="800"
     />
     <img
       class="phone"
       src="{base}screens/phone.png"
-      alt="Ficelle on a phone, the list of notes"
+      alt="The same note on a phone"
       width="1080"
       height="2400"
     />
