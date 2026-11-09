@@ -1,0 +1,5 @@
+.atelier/
+dist/
+pnpm-lock.yaml
+LICENSE
+public/
