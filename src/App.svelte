@@ -56,7 +56,7 @@
     <img
       class="desktop"
       src="{base}screens/desktop.png"
-      alt="Ficelle on a computer, a note with a checklist, a callout and a picture of a cat, beside the list of notes"
+      alt="Ficelle on a computer, a note with a checklist, a callout and a cat, beside the list of notes"
       width="1280"
       height="800"
     />
