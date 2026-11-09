@@ -17,12 +17,13 @@
     OBTAINIUM,
     systemFromAddress,
     type Files,
+    type Seen,
     type System,
   } from './download'
 
   const seen = navigator as Navigator & { userAgentData?: { platform?: string } }
   const asked = systemFromAddress(location.search)
-  const system: System | null =
+  const system: Seen | null =
     asked !== undefined
       ? asked
       : detectSystem({
@@ -49,25 +50,37 @@
     android: 'Android',
   }
 
-  interface Item {
+  // one row per system, its files side by side: more packages add buttons, not rows
+  interface Row {
     system: System
-    kind: string
     version: string
-    href: string
+    files: { kind: string; href: string }[]
     untested?: boolean
   }
-  const all: Item[] = $derived([
-    { system: 'windows', kind: 'Installer', version, href: link(files?.installer) },
-    { system: 'windows', kind: 'Portable', version, href: link(files?.portable) },
-    { system: 'mac', kind: 'Disk image', version: MAC_VERSION, href: MAC_DMG, untested: true },
-    { system: 'linux', kind: 'AppImage', version, href: link(files?.appImage) },
-    { system: 'android', kind: 'APK', version, href: link(files?.apk) },
+  const all: Row[] = $derived([
+    {
+      system: 'windows',
+      version,
+      files: [
+        { kind: 'Installer', href: link(files?.installer) },
+        { kind: 'Portable', href: link(files?.portable) },
+      ],
+    },
+    {
+      system: 'mac',
+      version: MAC_VERSION,
+      files: [{ kind: 'Disk image', href: MAC_DMG }],
+      untested: true,
+    },
+    { system: 'linux', version, files: [{ kind: 'AppImage', href: link(files?.appImage) }] },
+    { system: 'android', version, files: [{ kind: 'APK', href: link(files?.apk) }] },
   ])
   // the visitor's own system first, the others in their usual order
-  const items = $derived([
-    ...all.filter((i) => i.system === system),
-    ...all.filter((i) => i.system !== system),
+  const rows = $derived([
+    ...all.filter((r) => r.system === system),
+    ...all.filter((r) => r.system !== system),
   ])
+  const hasBuild = (s: Seen | null): s is System => s !== null && s !== 'ios'
 
   const main = $derived.by(() => {
     switch (system) {
@@ -91,7 +104,8 @@
       <a class="main" href={main.href}>
         <span class="icon">{@html download}</span>
         <span class="text">
-          <span class="label">{system ? `Download for ${NAMES[system]}` : 'See all downloads'}</span
+          <span class="label"
+            >{hasBuild(system) ? `Download for ${NAMES[system]}` : 'See all downloads'}</span
           >
           <span class="detail">{main.detail.trim()}</span>
         </span>
@@ -127,6 +141,12 @@
     <p class="note">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</p>
   {:else if system === 'linux'}
     <p class="note">Packages for Debian, Fedora, the AUR and Flathub are coming soon.</p>
+  {:else if system === 'ios'}
+    <p class="note">
+      There is no iOS app, I have no Apple device to test one on. The web version, with a phone
+      layout, will be the way to use Ficelle on an iPhone or iPad, until a Mac or iOS contributor
+      joins or I get the hardware.
+    </p>
   {:else if !system}
     <p class="note">Your system could not be detected, or Ficelle does not support it yet.</p>
   {/if}
@@ -134,17 +154,20 @@
   {#if open}
     <div id="systems" class="menu" transition:slide={opening}>
       <ul>
-        {#each items as item (item.system + item.kind)}
-          <li>
-            <a class="item" class:current={item.system === system} href={item.href}>
-              <span class="system">{NAMES[item.system]}</span>
-              <span class="kind">
-                {item.kind}
-                {#if item.untested}<span class="tag">Untested</span>{/if}
-              </span>
-              <span class="version">{item.version}</span>
-              <span class="icon">{@html download}</span>
-            </a>
+        {#each rows as row (row.system)}
+          <li class="item" class:current={row.system === system}>
+            <span class="system">
+              {NAMES[row.system]}
+              {#if row.untested}<span class="tag">Untested</span>{/if}
+            </span>
+            <span class="files">
+              {#each row.files as file (file.kind)}
+                <a class="file" href={file.href}>
+                  <span class="icon">{@html download}</span>{file.kind}
+                </a>
+              {/each}
+            </span>
+            <span class="version">{row.version}</span>
           </li>
         {/each}
       </ul>
@@ -235,7 +258,7 @@
   }
   .note {
     margin: 0;
-    max-width: 44ch;
+    max-width: 60ch;
     color: var(--color-text-muted);
     font-size: 15px;
   }
@@ -262,55 +285,72 @@
   }
   .item {
     display: grid;
-    grid-template-columns: 84px 1fr auto 20px;
+    grid-template-columns: 96px 1fr auto;
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3);
     border-left: 2px solid transparent;
-    border-radius: var(--radius-control);
-    color: var(--color-text);
-    text-decoration: none;
-    transition: background var(--dur-fast) var(--ease-out);
   }
-  .item:hover,
-  .item:focus-visible {
-    background: var(--color-surface-2);
+  .item + .item {
+    border-top: 1px solid var(--color-border);
   }
   .item.current {
     border-left-color: var(--color-accent);
   }
   .system {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
     font-weight: 700;
-  }
-  .kind {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-text-muted);
-    font-weight: 550;
   }
   .tag {
     padding: 0 var(--space-1);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-control);
-    font-size: 12px;
+    color: var(--color-text-muted);
+    font-size: 11px;
     font-weight: 600;
+  }
+  .files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .file {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
+  }
+  .file:hover,
+  .file:focus-visible {
+    border-color: var(--color-accent);
+    background: var(--color-surface-2);
+  }
+  .file .icon {
+    color: var(--color-text-faint);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .file:hover .icon {
+    color: var(--color-accent);
+  }
+  .file .icon :global(svg) {
+    width: 16px;
+    height: 16px;
   }
   .version {
     color: var(--color-text-faint);
     font-family: var(--font-mono);
     font-size: 13px;
-  }
-  .item .icon {
-    color: var(--color-text-faint);
-    transition: color var(--dur-fast) var(--ease-out);
-  }
-  .item:hover .icon {
-    color: var(--color-accent);
-  }
-  .item .icon :global(svg) {
-    width: 18px;
-    height: 18px;
   }
 
   /* phones: one column of full width buttons, easy to reach with a thumb */
@@ -337,14 +377,7 @@
       width: 100%;
     }
     .item {
-      grid-template-columns: 72px 1fr auto 20px;
-    }
-    .kind {
-      white-space: nowrap;
-    }
-    /* the note under the menu says it */
-    .tag {
-      display: none;
+      grid-template-columns: 80px 1fr auto;
     }
     .note,
     .obtainium {
