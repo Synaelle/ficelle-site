@@ -21,6 +21,9 @@
     type Seen,
     type System,
   } from './download'
+  import type { Messages } from './locales/en'
+
+  let { t }: { t: Messages } = $props()
 
   const seen = navigator as Navigator & { userAgentData?: { platform?: string } }
   const asked = systemFromAddress(location.search)
@@ -63,14 +66,14 @@
       system: 'windows',
       version,
       files: [
-        { kind: 'Installer', href: link(files?.installer) },
-        { kind: 'Portable', href: link(files?.portable) },
+        { kind: t.installer, href: link(files?.installer) },
+        { kind: t.portable, href: link(files?.portable) },
       ],
     },
     {
       system: 'mac',
       version: MAC_VERSION,
-      files: [{ kind: 'Disk image', href: MAC_DMG }],
+      files: [{ kind: t.diskImage, href: MAC_DMG }],
       untested: true,
     },
     { system: 'linux', version, files: [{ kind: 'AppImage', href: link(files?.appImage) }] },
@@ -86,15 +89,15 @@
   const main = $derived.by(() => {
     switch (system) {
       case 'windows':
-        return { href: link(files?.installer), detail: `Installer ${version}` }
+        return { href: link(files?.installer), detail: `${t.installer} ${version}` }
       case 'mac':
-        return { href: MAC_DMG, detail: `Disk image ${MAC_VERSION}, untested` }
+        return { href: MAC_DMG, detail: t.macDetail(MAC_VERSION) }
       case 'linux':
         return { href: link(files?.appImage), detail: `AppImage ${version}` }
       case 'android':
         return { href: link(files?.apk), detail: `APK ${version}` }
       default:
-        return { href: LATEST_PAGE, detail: 'Every system, on GitHub' }
+        return { href: LATEST_PAGE, detail: t.everySystem }
     }
   })
 </script>
@@ -106,14 +109,14 @@
         <span class="icon">{@html download}</span>
         <span class="text">
           <span class="label"
-            >{hasBuild(system) ? `Download for ${NAMES[system]}` : 'See all downloads'}</span
+            >{hasBuild(system) ? t.downloadFor(NAMES[system]) : t.allDownloads}</span
           >
           <span class="detail">{main.detail.trim()}</span>
         </span>
       </a>
       <button
         class="more"
-        aria-label="Other systems"
+        aria-label={t.otherSystems}
         aria-expanded={open}
         aria-controls="systems"
         onclick={() => (open = !open)}
@@ -125,32 +128,30 @@
       <a class="other" href={OBTAINIUM}>
         <span class="icon">{@html obtainium}</span>
         <span class="text">
-          <span class="label">Get it on Obtainium</span>
-          <span class="detail">Automatic updates</span>
+          <span class="label">{t.obtainium}</span>
+          <span class="detail">{t.obtainiumDetail}</span>
         </span>
       </a>
     {/if}
-    <button class="web" disabled title="Coming later">
+    <button class="web" disabled title={t.webLater}>
       <span class="icon">{@html globe}</span>
       <span class="text">
-        <span class="label">Web version</span>
-        <span class="detail">Coming later</span>
+        <span class="label">{t.web}</span>
+        <span class="detail">{t.webLater}</span>
       </span>
     </button>
   </div>
 
   {#if system === 'mac'}
-    <p class="note">The Mac app is untested, see <a href={MAC_DOC}>Ficelle on a Mac</a>.</p>
-  {:else if system === 'linux'}
-    <p class="note">Packages for Debian, Fedora, the AUR and Flathub are coming soon.</p>
-  {:else if system === 'ios'}
     <p class="note">
-      There is no iOS app, I have no Apple device to test one on. The web version, with a phone
-      layout, will be the way to use Ficelle on an iPhone or iPad, until a Mac or iOS contributor
-      joins or I get the hardware.
+      {t.macNote.before}<a href={MAC_DOC}>{t.macNote.link}</a>{t.macNote.after}
     </p>
+  {:else if system === 'linux'}
+    <p class="note">{t.linuxNote}</p>
+  {:else if system === 'ios'}
+    <p class="note">{t.iosNote}</p>
   {:else if !system}
-    <p class="note">Your system could not be detected, or Ficelle does not support it yet.</p>
+    <p class="note">{t.unknownNote}</p>
   {/if}
 
   {#if open}
@@ -160,7 +161,7 @@
           <li class="item" class:current={row.system === system}>
             <span class="system">
               {NAMES[row.system]}
-              {#if row.untested}<span class="tag">Untested</span>{/if}
+              {#if row.untested}<span class="tag">{t.untested}</span>{/if}
             </span>
             <span class="files">
               {#each row.files as file (file.kind)}
