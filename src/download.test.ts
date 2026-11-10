@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest'
-import { detectSystem, filesOf, systemFromAddress } from './download'
+import { detectSystem, filesOf, newestRelease, systemFromAddress } from './download'
 
 const UA = {
   windows:
@@ -65,6 +65,29 @@ describe('filesOf', () => {
       apk: 'https://x/ficelle-0.5.1-android.apk',
       dmg: 'https://x/Ficelle_0.5.1_universal.dmg',
     })
+  })
+})
+
+describe('newestRelease', () => {
+  const tags = (...names: string[]) => names.map((tag_name) => ({ tag_name }))
+
+  it('takes a beta newer than the latest release', () => {
+    expect(newestRelease(tags('v0.5.4', 'beta', 'v0.6.0-beta.2', 'v0.6.0-beta.10'))).toEqual({
+      tag_name: 'v0.6.0-beta.10',
+    })
+  })
+
+  it('takes the release once it is out, over its betas', () => {
+    expect(newestRelease(tags('v0.6.0-beta.3', 'beta', 'v0.6.0', 'v0.5.10'))).toEqual({
+      tag_name: 'v0.6.0',
+    })
+  })
+
+  it('leaves drafts and other tags aside', () => {
+    expect(newestRelease([{ tag_name: 'v0.7.0', draft: true }, ...tags('v0.5.4')])).toEqual({
+      tag_name: 'v0.5.4',
+    })
+    expect(newestRelease(tags('beta'))).toBeUndefined()
   })
 })
 

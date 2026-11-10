@@ -15,6 +15,7 @@
     MAC_FALLBACK_DMG,
     MAC_FALLBACK_VERSION,
     MAC_DOC,
+    newestFiles,
     OBTAINIUM,
     systemFromAddress,
     type Files,
@@ -37,8 +38,12 @@
         })
 
   let files = $state<Files | null>(null)
+  // the newest build, a beta or the release itself when no beta is newer
+  let newest = $state<Files | null>(null)
+  let beta = $state(false)
   let open = $state(false)
   latestFiles().then((found) => (files = found))
+  newestFiles().then((found) => (newest = found))
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches
   const opening = { duration: still ? 0 : 220, easing: cubicOut }
@@ -52,6 +57,16 @@
       ? { href: files.dmg, version }
       : { href: MAC_FALLBACK_DMG, version: MAC_FALLBACK_VERSION },
   )
+
+  // the menu lists the release, or the newest build once Beta is picked; the
+  // main button always stays on the release
+  const listed = $derived(beta && newest ? newest : files)
+  const listedVersion = $derived(listed?.version ?? '')
+  // betas rarely have a Mac build, the Mac row then keeps the release's
+  const listedMac = $derived(
+    beta && newest?.dmg ? { href: newest.dmg, version: newest.version } : mac,
+  )
+  const betaNewer = $derived(!!newest && !!files && newest.version !== files.version)
 
   const NAMES: Record<System, string> = {
     windows: 'Windows',
@@ -70,20 +85,28 @@
   const all: Row[] = $derived([
     {
       system: 'windows',
-      version,
+      version: listedVersion,
       files: [
-        { kind: t.installer, href: link(files?.installer) },
-        { kind: t.portable, href: link(files?.portable) },
+        { kind: t.installer, href: link(listed?.installer) },
+        { kind: t.portable, href: link(listed?.portable) },
       ],
     },
     {
       system: 'mac',
-      version: mac.version,
-      files: [{ kind: t.diskImage, href: mac.href }],
+      version: listedMac.version,
+      files: [{ kind: t.diskImage, href: listedMac.href }],
       untested: true,
     },
-    { system: 'linux', version, files: [{ kind: 'AppImage', href: link(files?.appImage) }] },
-    { system: 'android', version, files: [{ kind: 'APK', href: link(files?.apk) }] },
+    {
+      system: 'linux',
+      version: listedVersion,
+      files: [{ kind: 'AppImage', href: link(listed?.appImage) }],
+    },
+    {
+      system: 'android',
+      version: listedVersion,
+      files: [{ kind: 'APK', href: link(listed?.apk) }],
+    },
   ])
   // the visitor's own system first, the others in their usual order
   const rows = $derived([
@@ -162,6 +185,28 @@
 
   {#if open}
     <div id="systems" class="menu" transition:slide={opening}>
+      {#if files && newest}
+        <div class="channels">
+          <div class="switch" role="group" aria-label={t.channel}>
+            <button aria-pressed={!beta} onclick={() => (beta = false)}>
+              {t.stable} <span class="number">{files.version}</span>
+            </button>
+            <button aria-pressed={beta} onclick={() => (beta = true)}>
+              {t.beta} <span class="number">{newest.version}</span>
+            </button>
+          </div>
+          {#if beta}
+            <p class="channel-note">
+              {#if betaNewer}
+                {t.betaNote}
+                {#if !newest.dmg}{t.betaNoMac(mac.version)}{/if}
+              {:else}
+                {t.noNewerBeta(newest.version)}
+              {/if}
+            </p>
+          {/if}
+        </div>
+      {/if}
       <ul>
         {#each rows as row (row.system)}
           <li class="item" class:current={row.system === system}>
@@ -176,7 +221,9 @@
                 </a>
               {/each}
             </span>
-            <span class="version">{row.version}</span>
+            <span class="version" class:ahead={betaNewer && row.version === newest?.version}
+              >{row.version}</span
+            >
           </li>
         {/each}
       </ul>
@@ -290,6 +337,57 @@
     text-align: left;
     overflow: hidden;
   }
+  .channels {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-3) var(--space-1);
+  }
+  .switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+  }
+  .switch button {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 6px var(--space-3);
+    border: none;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .switch button:hover {
+    color: var(--color-text);
+  }
+  .switch button[aria-pressed='true'] {
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px var(--color-border-strong);
+    color: var(--color-text);
+  }
+  .number {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .channel-note {
+    margin: 0;
+    padding: 0 var(--space-1);
+    color: var(--color-text-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
   .menu ul {
     margin: 0;
     padding: var(--space-1);
@@ -364,6 +462,9 @@
     font-family: var(--font-mono);
     font-size: 13px;
   }
+  .version.ahead {
+    color: var(--color-accent-text);
+  }
 
   /* phones: one column of full width buttons, easy to reach with a thumb */
   @media (max-width: 560px) {
@@ -388,6 +489,10 @@
     }
     .menu {
       width: 100%;
+    }
+    .switch button {
+      min-height: 44px;
+      align-items: center;
     }
     .item {
       grid-template-columns: 80px 1fr auto;

@@ -69,7 +69,32 @@ export interface Files {
 
 interface ReleaseJson {
   tag_name?: string
+  draft?: boolean
   assets?: { name: string; browser_download_url: string }[]
+}
+
+/** A version tag as numbers to sort by, a beta before its release, or null
+ * for any other tag (the fixed "beta" release the beta apps read). */
+function rank(tag: string): number[] | null {
+  const m = /^v(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?$/.exec(tag)
+  if (!m) return null
+  return [Number(m[1]), Number(m[2]), Number(m[3]), m[4] === undefined ? Infinity : Number(m[4])]
+}
+
+function isNewer(a: number[], b: number[]): boolean {
+  const k = a.findIndex((n, i) => n !== b[i])
+  // both ranks have four parts, so k is within each
+  return k >= 0 && a[k]! > b[k]!
+}
+
+/** The newest release of either kind, beta or stable, the way beta apps update. */
+export function newestRelease<R extends ReleaseJson>(releases: R[]): R | undefined {
+  let best: { release: R; rank: number[] } | undefined
+  for (const release of releases) {
+    const r = release.draft ? null : rank(release.tag_name ?? '')
+    if (r && (!best || isNewer(r, best.rank))) best = { release, rank: r }
+  }
+  return best?.release
 }
 
 /** The download links of a release, from GitHub's release API answer. */
@@ -94,6 +119,21 @@ export async function latestFiles(): Promise<Files | null> {
     })
     if (!res.ok) return null
     return filesOf((await res.json()) as ReleaseJson)
+  } catch {
+    return null
+  }
+}
+
+/** The newest release's files, a beta or the latest release when no beta is
+ * newer, or null when GitHub cannot be reached. */
+export async function newestFiles(): Promise<Files | null> {
+  try {
+    const res = await fetch('https://api.github.com/repos/Synaelle/ficelle/releases?per_page=30', {
+      headers: { accept: 'application/vnd.github+json' },
+    })
+    if (!res.ok) return null
+    const newest = newestRelease((await res.json()) as ReleaseJson[])
+    return newest ? filesOf(newest) : null
   } catch {
     return null
   }
