@@ -28,6 +28,9 @@ export const en = {
   betaNoMac: (version: string) => `The Mac has no beta build, so it stays on ${version}.`,
   noNewerBeta: (version: string) =>
     `No beta is newer than the release right now, so the beta is ${version} too.`,
+  downloadFrom: 'Download from',
+  mirror: 'Mirror',
+  githubDown: 'GitHub cannot be reached',
   obtainium: 'Get it on Obtainium',
   obtainiumDetail: 'Automatic updates',
   web: 'Web version',

@@ -9,6 +9,9 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    # the downloads mirror.sh keeps, served at /site/mirror/
+    volumes:
+      - ./mirror:/usr/share/nginx/html/site/mirror:ro
     cap_drop:
       - ALL
     security_opt:

@@ -32,6 +32,9 @@ export const fr: Messages = {
   betaNoMac: (version: string) => `Le Mac n’a pas de version bêta, il reste en ${version}.`,
   noNewerBeta: (version: string) =>
     `Aucune bêta n’est plus récente que la version stable pour l’instant, la bêta est donc aussi la ${version}.`,
+  downloadFrom: 'Télécharger depuis',
+  mirror: 'Miroir',
+  githubDown: 'GitHub est injoignable',
   obtainium: 'Obtenir sur Obtainium',
   obtainiumDetail: 'Mises à jour automatiques',
   web: 'Version web',

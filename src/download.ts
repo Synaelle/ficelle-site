@@ -124,6 +124,24 @@ export async function latestFiles(): Promise<Files | null> {
   }
 }
 
+export interface Mirrored {
+  stable: Files
+  newest: Files
+}
+
+/** The same downloads from this server, kept by deploy/mirror.sh every two
+ * hours, or null when the server has no mirror. */
+export async function mirroredFiles(): Promise<Mirrored | null> {
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}mirror/mirror.json`)
+    if (!res.ok) return null
+    const list = (await res.json()) as { stable: ReleaseJson; newest: ReleaseJson }
+    return { stable: filesOf(list.stable), newest: filesOf(list.newest) }
+  } catch {
+    return null
+  }
+}
+
 /** The newest release's files, a beta or the latest release when no beta is
  * newer, or null when GitHub cannot be reached. */
 export async function newestFiles(): Promise<Files | null> {

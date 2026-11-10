@@ -1,0 +1,9 @@
+[Unit]
+Description=Copy Ficelle's latest downloads for the website's mirror
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ficelle-site
+ExecStart=/opt/ficelle-site/mirror.sh /opt/ficelle-site/mirror

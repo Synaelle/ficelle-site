@@ -15,10 +15,12 @@
     MAC_FALLBACK_DMG,
     MAC_FALLBACK_VERSION,
     MAC_DOC,
+    mirroredFiles,
     newestFiles,
     OBTAINIUM,
     systemFromAddress,
     type Files,
+    type Mirrored,
     type Seen,
     type System,
   } from './download'
@@ -37,13 +39,21 @@
           maxTouchPoints: navigator.maxTouchPoints,
         })
 
-  let files = $state<Files | null>(null)
+  let fromGithub = $state<Files | null>(null)
   // the newest build, a beta or the release itself when no beta is newer
-  let newest = $state<Files | null>(null)
+  let newestFromGithub = $state<Files | null>(null)
+  let mirror = $state<Mirrored | null>(null)
+  let pickedMirror = $state(false)
   let beta = $state(false)
   let open = $state(false)
-  latestFiles().then((found) => (files = found))
-  newestFiles().then((found) => (newest = found))
+  latestFiles().then((found) => (fromGithub = found))
+  newestFiles().then((found) => (newestFromGithub = found))
+  mirroredFiles().then((found) => (mirror = found))
+
+  // this server's copy when picked, or when GitHub cannot be reached
+  const onMirror = $derived(!!mirror && (pickedMirror || !fromGithub))
+  const files = $derived(onMirror ? mirror!.stable : fromGithub)
+  const newest = $derived(onMirror ? mirror!.newest : newestFromGithub)
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches
   const opening = { duration: still ? 0 : 220, easing: cubicOut }
@@ -227,6 +237,19 @@
           </li>
         {/each}
       </ul>
+      {#if mirror}
+        <p class="source" role="group" aria-label={t.downloadFrom}>
+          <span>{t.downloadFrom}</span>
+          <button
+            aria-pressed={!onMirror}
+            disabled={!fromGithub}
+            title={fromGithub ? undefined : t.githubDown}
+            onclick={() => (pickedMirror = false)}>GitHub</button
+          >
+          <span aria-hidden="true">·</span>
+          <button aria-pressed={onMirror} onclick={() => (pickedMirror = true)}>{t.mirror}</button>
+        </p>
+      {/if}
     </div>
   {/if}
 </div>
@@ -464,6 +487,37 @@
   }
   .version.ahead {
     color: var(--color-accent-text);
+  }
+  .source {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: var(--space-1);
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-faint);
+    font-size: 12px;
+  }
+  .source button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-text-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+  .source button:hover:not(:disabled) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .source button[aria-pressed='true'] {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+  .source button:disabled {
+    cursor: not-allowed;
   }
 
   /* phones: one column of full width buttons, easy to reach with a thumb */
