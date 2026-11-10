@@ -5,5 +5,29 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+# its own user, which owns the mirror folder and can write nowhere else
+User=ficelle-mirror
+Group=ficelle-mirror
+UMask=0022
 WorkingDirectory=/opt/ficelle-site
 ExecStart=/opt/ficelle-site/mirror.sh /opt/ficelle-site/mirror
+ProtectSystem=strict
+ReadWritePaths=/opt/ficelle-site/mirror
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
