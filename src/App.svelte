@@ -136,7 +136,7 @@
 
   <section class="screens" aria-label={t.screenshots}>
     <img class="desktop" src={desktopShot} alt={t.desktopShot} width="1280" height="800" />
-    <img class="phone" src={phoneShot} alt={t.phoneShot} width="1080" height="2400" />
+    <img class="phone" src={phoneShot} alt={t.phoneShot} width="1080" height="2201" />
   </section>
 </main>
 
