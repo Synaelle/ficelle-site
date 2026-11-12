@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@app/ui':
-        specifier: github:Synaelle/ficelle#eff491479c61837b97c48850cf3aba7abb4afb63&path:/packages/ui
-        version: https://codeload.github.com/Synaelle/ficelle/tar.gz/eff491479c61837b97c48850cf3aba7abb4afb63#path:/packages/ui
+        specifier: github:Synaelle/ficelle#7698599c8c56abddc644305291a26a913d724a67&path:/packages/ui
+        version: https://codeload.github.com/Synaelle/ficelle/tar.gz/7698599c8c56abddc644305291a26a913d724a67#path:/packages/ui
       '@fontsource-variable/hanken-grotesk':
         specifier: 5.3.0
         version: 5.3.0
@@ -209,8 +209,8 @@ importers:
 
 packages:
 
-  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/eff491479c61837b97c48850cf3aba7abb4afb63#path:/packages/ui':
-    resolution: {gitHosted: true, integrity: sha512-DI3ECllcrnNFkZv90W8QtYZ/v7iWNWFVwM5XMur2PYiiJjpMGMT+a/rMBbwuJshYbmxYRbq9K+ag9DthByN5BA==, path: /packages/ui, tarball: https://codeload.github.com/Synaelle/ficelle/tar.gz/eff491479c61837b97c48850cf3aba7abb4afb63}
+  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/7698599c8c56abddc644305291a26a913d724a67#path:/packages/ui':
+    resolution: {gitHosted: true, integrity: sha512-ORowlv+wrvr077L1WcUhISrn8SAOjfu7WWZUxF6L0a4+sJq0MRxG/ByUTnt2PE/l7muSnUGT2Xa5ZWwQKOSX1A==, path: /packages/ui, tarball: https://codeload.github.com/Synaelle/ficelle/tar.gz/7698599c8c56abddc644305291a26a913d724a67}
     version: 0.0.0
 
   '@fontsource-variable/hanken-grotesk@5.3.0':
@@ -734,7 +734,7 @@ packages:
 
 snapshots:
 
-  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/eff491479c61837b97c48850cf3aba7abb4afb63#path:/packages/ui': {}
+  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/7698599c8c56abddc644305291a26a913d724a67#path:/packages/ui': {}
 
   '@fontsource-variable/hanken-grotesk@5.3.0': {}
 
