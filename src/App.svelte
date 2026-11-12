@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <script lang="ts">
-  import github from '@phosphor-icons/core/assets/regular/github-logo.svg?raw'
   import check from 'lucide-static/icons/check.svg?raw'
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
   import globe from 'lucide-static/icons/globe.svg?raw'
   import Knot from '@app/ui/Knot.svelte'
   import Download from './Download.svelte'
+  import github from './github.svg?raw'
   import desktopShot from './screens/desktop.png'
   import phoneShot from './screens/phone.png'
   import { REPO } from './download'
@@ -188,9 +188,8 @@
     color: var(--color-text);
   }
   .source :global(svg) {
-    width: 28px;
-    height: 28px;
-    fill: currentColor;
+    width: 26px;
+    height: 26px;
   }
   .picker {
     position: absolute;
