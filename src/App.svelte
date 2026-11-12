@@ -282,13 +282,20 @@
     .intro {
       padding-top: var(--space-6);
     }
-    .desktop {
-      width: 100%;
+    /* a phone visitor sees the phone app first, the desktop one after */
+    .screens {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
     }
     .phone {
+      order: -1;
       position: static;
-      width: 46%;
-      margin: calc(-1 * var(--space-7)) var(--space-4) 0 auto;
+      width: min(72%, 320px);
+    }
+    .desktop {
+      width: 100%;
     }
   }
 </style>
