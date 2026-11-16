@@ -31,7 +31,7 @@ export const en = {
   webMainDetail: 'Nothing to install',
 
   macNote: { before: 'The Mac app is untested, see ', link: 'Ficelle on a Mac', after: '.' },
-  linuxNote: 'Packages for Debian, Fedora, the AUR and Flathub are coming soon.',
+  linuxNote: 'Packages for the AUR and Flathub are coming soon.',
   iosNote:
     'There is no iPhone or iPad app, I have no Apple device to test one on. Ficelle works in Safari instead, and your notes stay on this device. Add it to your Home Screen, or Safari may delete them after a week away.',
   noAppNote:
