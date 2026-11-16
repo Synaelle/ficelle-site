@@ -1,6 +1,8 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<!-- One button for the visitor's system, an arrow for the others. Without a
-     system it can tell, it sends to the release page; later, to the web version. -->
+<!-- One button for the visitor's system, an arrow for the others. On a
+     system with no app (iOS, the BSDs, Haiku) the main button opens the web
+     version, the downloads stay under the arrow. Without a system it can
+     tell, it sends to the release page. -->
 <script lang="ts">
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
   import download from 'lucide-static/icons/download.svg?raw'
@@ -19,6 +21,8 @@
     newestFiles,
     OBTAINIUM,
     systemFromAddress,
+    WEB_URL,
+    webFirst,
     type Files,
     type Mirrored,
     type Seen,
@@ -123,7 +127,7 @@
     ...all.filter((r) => r.system === system),
     ...all.filter((r) => r.system !== system),
   ])
-  const hasBuild = (s: Seen | null): s is System => s !== null && s !== 'ios'
+  const hasBuild = (s: Seen | null): s is System => s !== null && !webFirst(s)
 
   const main = $derived.by(() => {
     switch (system) {
@@ -144,15 +148,25 @@
 <div class="download">
   <div class="row">
     <div class="split">
-      <a class="main" href={main.href}>
-        <span class="icon">{@html download}</span>
-        <span class="text">
-          <span class="label"
-            >{hasBuild(system) ? t.downloadFor(NAMES[system]) : t.allDownloads}</span
-          >
-          <span class="detail">{main.detail.trim()}</span>
-        </span>
-      </a>
+      {#if webFirst(system)}
+        <a class="main" href={WEB_URL}>
+          <span class="icon">{@html globe}</span>
+          <span class="text">
+            <span class="label">{t.webMain}</span>
+            <span class="detail">{t.webMainDetail}</span>
+          </span>
+        </a>
+      {:else}
+        <a class="main" href={main.href}>
+          <span class="icon">{@html download}</span>
+          <span class="text">
+            <span class="label"
+              >{hasBuild(system) ? t.downloadFor(NAMES[system]) : t.allDownloads}</span
+            >
+            <span class="detail">{main.detail.trim()}</span>
+          </span>
+        </a>
+      {/if}
       <button
         class="more"
         aria-label={t.otherSystems}
@@ -172,13 +186,15 @@
         </span>
       </a>
     {/if}
-    <button class="web" disabled title={t.webLater}>
-      <span class="icon">{@html globe}</span>
-      <span class="text">
-        <span class="label">{t.web}</span>
-        <span class="detail">{t.webLater}</span>
-      </span>
-    </button>
+    {#if !webFirst(system)}
+      <a class="web" href={WEB_URL}>
+        <span class="icon">{@html globe}</span>
+        <span class="text">
+          <span class="label">{t.web}</span>
+          <span class="detail">{t.webDetail}</span>
+        </span>
+      </a>
+    {/if}
   </div>
 
   {#if system === 'mac'}
@@ -189,6 +205,8 @@
     <p class="note">{t.linuxNote}</p>
   {:else if system === 'ios'}
     <p class="note">{t.iosNote}</p>
+  {:else if system === 'bsd' || system === 'haiku'}
+    <p class="note">{t.noAppNote}</p>
   {:else if !system}
     <p class="note">{t.unknownNote}</p>
   {/if}
@@ -314,10 +332,10 @@
     padding: var(--space-3) var(--space-5);
     border: 1px solid var(--color-border-strong);
     background: transparent;
-    color: var(--color-text-muted);
+    color: var(--color-text);
   }
-  .web:disabled {
-    cursor: not-allowed;
+  .web:hover {
+    border-color: var(--color-text-muted);
   }
   .text {
     display: grid;

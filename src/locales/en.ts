@@ -34,12 +34,16 @@ export const en = {
   obtainium: 'Get it on Obtainium',
   obtainiumDetail: 'Automatic updates',
   web: 'Web version',
-  webLater: 'Coming later',
+  webDetail: 'In your browser',
+  webMain: 'Use Ficelle in your browser',
+  webMainDetail: 'Nothing to install',
 
   macNote: { before: 'The Mac app is untested, see ', link: 'Ficelle on a Mac', after: '.' },
   linuxNote: 'Packages for Debian, Fedora, the AUR and Flathub are coming soon.',
   iosNote:
-    'There is no iOS app, I have no Apple device to test one on. The web version, with a phone layout, will be the way to use Ficelle on an iPhone or iPad, until a Mac or iOS contributor joins or I get the hardware.',
+    'There is no iPhone or iPad app, I have no Apple device to test one on. Ficelle works in Safari instead, and your notes stay on this device. Add it to your Home Screen, or Safari may delete them after a week away.',
+  noAppNote:
+    'There is no app for this system. Ficelle works in your browser instead, and your notes stay on this device.',
   unknownNote: 'Your system could not be detected, or Ficelle does not support it yet.',
 }
 

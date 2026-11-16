@@ -2,8 +2,15 @@
 // Which system the visitor is on, and the files of the latest release for it.
 
 export type System = 'windows' | 'mac' | 'linux' | 'android'
-/** Where the visitor may be: a system with a build, or iOS, which has none. */
-export type Seen = System | 'ios'
+/** Where the visitor may be: a system with a build, or one with none where
+ * the web version is the way (iOS, the BSDs, Haiku). */
+export type Seen = System | 'ios' | 'bsd' | 'haiku'
+
+/** The systems with no app, where the page offers the web version first. */
+export const webFirst = (s: Seen | null): boolean => s === 'ios' || s === 'bsd' || s === 'haiku'
+
+/** The web version, notes kept in the visitor's browser. */
+export const WEB_URL = 'https://web.ficelle.synaelle.com'
 
 export const REPO = 'https://github.com/Synaelle/ficelle'
 export const LATEST_PAGE = `${REPO}/releases/latest`
@@ -36,6 +43,9 @@ export function detectSystem({
   if (hint === 'android' || /Android/i.test(ua)) return 'android'
   if (/iPhone|iPad|iPod/.test(ua)) return 'ios'
   if (hint === 'chrome os' || /CrOS/.test(ua)) return null
+  // Haiku's browser calls itself a Mac, the BSDs say X11 like Linux
+  if (/Haiku/.test(ua)) return 'haiku'
+  if (/FreeBSD|OpenBSD|NetBSD|DragonFly/.test(ua)) return 'bsd'
   if (hint === 'windows' || /Windows/.test(ua)) return 'windows'
   if (hint === 'macos' || /Macintosh|Mac OS X/.test(ua)) {
     // an iPad asks for the desktop page and says Mac, but it has touch
@@ -45,11 +55,11 @@ export function detectSystem({
   return null
 }
 
-const SEEN: readonly Seen[] = ['windows', 'mac', 'linux', 'android', 'ios']
+const SEEN: readonly Seen[] = ['windows', 'mac', 'linux', 'android', 'ios', 'bsd', 'haiku']
 
 /**
  * The system asked for in the address, `?os=windows` (or `mac`, `linux`,
- * `android`, `ios`, `none` for one that is not detected), to see the page as
+ * `android`, `ios`, `bsd`, `haiku`, `none` for one that is not detected), to see the page as
  * it shows there. Undefined when the address asks for nothing.
  */
 export function systemFromAddress(search: string): Seen | null | undefined {

@@ -38,7 +38,9 @@ export const fr: Messages = {
   obtainium: 'Obtenir sur Obtainium',
   obtainiumDetail: 'Mises à jour automatiques',
   web: 'Version web',
-  webLater: 'À venir',
+  webDetail: 'Dans votre navigateur',
+  webMain: 'Utiliser Ficelle dans votre navigateur',
+  webMainDetail: 'Rien à installer',
 
   macNote: {
     before: 'L’application Mac n’est pas testée, voir ',
@@ -47,7 +49,9 @@ export const fr: Messages = {
   },
   linuxNote: 'Des paquets pour Debian, Fedora, l’AUR et Flathub arrivent bientôt.',
   iosNote:
-    'Il n’y a pas d’application iOS, je n’ai aucun appareil Apple pour la tester. La version web, adaptée aux téléphones, sera le moyen d’utiliser Ficelle sur iPhone ou iPad, jusqu’à ce qu’une personne sur Mac ou iOS rejoigne le projet ou que j’aie le matériel.',
+    'Il n’y a pas d’application pour iPhone ou iPad, je n’ai aucun appareil Apple pour la tester. Ficelle fonctionne dans Safari à la place, et vos notes restent sur cet appareil. Ajoutez-la à votre écran d’accueil, sinon Safari peut les effacer après une semaine sans visite.',
+  noAppNote:
+    'Il n’y a pas d’application pour ce système. Ficelle fonctionne dans votre navigateur à la place, et vos notes restent sur cet appareil.',
   unknownNote:
     'Votre système n’a pas pu être détecté, ou Ficelle ne le prend pas encore en charge.',
 }

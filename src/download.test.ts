@@ -11,6 +11,9 @@ const UA = {
     'Mozilla/5.0 (Linux; Android 15; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Mobile Safari/537.36',
   iphone:
     'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+  freebsd: 'Mozilla/5.0 (X11; FreeBSD amd64; rv:144.0) Gecko/20100101 Firefox/144.0',
+  haiku:
+    'Mozilla/5.0 (Macintosh; Intel Haiku R1 x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) WebPositive/1.3 Version/11.1 Safari/605.1.15',
   chromeos:
     'Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36',
 }
@@ -34,6 +37,11 @@ describe('detectSystem', () => {
   it('tells iPhones and iPads apart, the iPad even when it says Mac', () => {
     expect(detectSystem({ userAgent: UA.iphone })).toBe('ios')
     expect(detectSystem({ userAgent: UA.mac, maxTouchPoints: 5 })).toBe('ios')
+  })
+
+  it('tells the BSDs and Haiku apart from Linux and the Mac', () => {
+    expect(detectSystem({ userAgent: UA.freebsd })).toBe('bsd')
+    expect(detectSystem({ userAgent: UA.haiku })).toBe('haiku')
   })
 
   it('offers nothing where there is no build', () => {
