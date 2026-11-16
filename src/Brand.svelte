@@ -65,7 +65,7 @@
     <h2>Fonts</h2>
     <p class="font ui">Hanken Grotesk</p>
     <p class="font editor">Atkinson Hyperlegible Next</p>
-    <p class="font mono">IBM Plex Mono</p>
+    <p class="font mono">JetBrains Mono</p>
   </section>
 
   <section>

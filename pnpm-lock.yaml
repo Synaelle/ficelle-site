@@ -167,12 +167,12 @@ importers:
   .:
     dependencies:
       '@app/ui':
-        specifier: github:Synaelle/ficelle#baede3d08dfa052759fdec97f90f9cbed8eaf377&path:/packages/ui
-        version: https://codeload.github.com/Synaelle/ficelle/tar.gz/baede3d08dfa052759fdec97f90f9cbed8eaf377#path:/packages/ui
+        specifier: github:Synaelle/ficelle#17c2b5fc6abd3e6832bc9f11d82e93fb19caa753&path:/packages/ui
+        version: https://codeload.github.com/Synaelle/ficelle/tar.gz/17c2b5fc6abd3e6832bc9f11d82e93fb19caa753#path:/packages/ui
       '@fontsource-variable/hanken-grotesk':
         specifier: 5.3.0
         version: 5.3.0
-      '@fontsource/ibm-plex-mono':
+      '@fontsource-variable/jetbrains-mono':
         specifier: 5.3.0
         version: 5.3.0
       lucide-static:
@@ -209,15 +209,15 @@ importers:
 
 packages:
 
-  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/baede3d08dfa052759fdec97f90f9cbed8eaf377#path:/packages/ui':
-    resolution: {gitHosted: true, integrity: sha512-/fv630ZpMofG98gNH7CtK3/aonX7G7aXiVAK9F9OEqsOfW7DduS5qbI6D+KwgW2HosR45iIGRaJq5W9TMgJyVw==, path: /packages/ui, tarball: https://codeload.github.com/Synaelle/ficelle/tar.gz/baede3d08dfa052759fdec97f90f9cbed8eaf377}
+  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/17c2b5fc6abd3e6832bc9f11d82e93fb19caa753#path:/packages/ui':
+    resolution: {gitHosted: true, integrity: sha512-U3h1e4llZgIoInohU0N7udY0DcXroh+9SZtilYEm3zlFPPS/aehKNFfL5GtFL65Rf4DRaC1ztx0KYvKmVcl5dQ==, path: /packages/ui, tarball: https://codeload.github.com/Synaelle/ficelle/tar.gz/17c2b5fc6abd3e6832bc9f11d82e93fb19caa753}
     version: 0.0.0
 
   '@fontsource-variable/hanken-grotesk@5.3.0':
     resolution: {integrity: sha512-DOd0FqL+3cH2dfNy0JtSq9tUfxBz5mLmHMjTU0DOr3E9Zo6wxuatCl53DIPNrSPgCsnuKyM739BTIG5glCLirw==}
 
-  '@fontsource/ibm-plex-mono@5.3.0':
-    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+  '@fontsource-variable/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -734,11 +734,11 @@ packages:
 
 snapshots:
 
-  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/baede3d08dfa052759fdec97f90f9cbed8eaf377#path:/packages/ui': {}
+  '@app/ui@https://codeload.github.com/Synaelle/ficelle/tar.gz/17c2b5fc6abd3e6832bc9f11d82e93fb19caa753#path:/packages/ui': {}
 
   '@fontsource-variable/hanken-grotesk@5.3.0': {}
 
-  '@fontsource/ibm-plex-mono@5.3.0': {}
+  '@fontsource-variable/jetbrains-mono@5.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
