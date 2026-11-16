@@ -10,11 +10,17 @@
 # A failed run changes nothing: a new version is downloaded beside the old
 # one and only listed once complete, and older versions go after that.
 #
-#   mirror.sh <folder>
+# Given a second folder, it also keeps the latest release's web version
+# there for web.ficelle.synaelle.com: unpacked into its own folder, checked
+# like the others, then `current` points at it (a link the site container
+# follows, its folder mounted once).
+#
+#   mirror.sh <folder> [<web folder>]
 set -euo pipefail
 umask 022
 
-dir=${1:?usage: mirror.sh <folder>}
+dir=${1:?usage: mirror.sh <folder> [<web folder>]}
+web=${2:-}
 api=https://api.github.com/repos/Synaelle/ficelle
 # the files the download menu offers
 wanted='(_x64-setup\.exe|_x64_portable\.exe|_amd64\.AppImage|-android\.apk|_universal\.dmg)$'
@@ -86,3 +92,36 @@ for old in "$dir"/v*/; do
   fi
 done
 echo "mirror up to date"
+
+[[ -n $web ]] || exit 0
+mkdir -p "$web"
+tag=$(jq -r .tag_name "$work/stable.json")
+if [[ $(readlink "$web/current" 2>/dev/null) == "$tag" && -e $web/$tag/.complete ]]; then
+  echo "web version $tag already in place"
+  exit 0
+fi
+IFS=$'\t' read -r name url digest < <(jq -r '.assets[] | select(.name | test("^ficelle-web-.*\\.zip$"))
+  | [.name, .browser_download_url, (.digest // "")] | @tsv' "$work/stable.json" | head -1) || true
+if [[ -z ${name:-} ]]; then
+  echo "$tag has no web version, the current one stays"
+  exit 0
+fi
+[[ $digest == sha256:* ]] || { echo "$tag/$name has no checksum on GitHub" >&2; exit 1; }
+echo "downloading $tag/$name"
+curl -fsSL --max-time 600 --retry 3 -o "$work/$name" "$url"
+echo "${digest#sha256:}  $work/$name" | sha256sum -c --quiet
+rm -rf "${web:?}/.$tag"
+mkdir -p "$web/.$tag"
+unzip -q "$work/$name" -d "$web/.$tag"
+test -f "$web/.$tag/index.html"
+touch "$web/.$tag/.complete"
+find "$web/.$tag" -type d -exec chmod 755 {} + && find "$web/.$tag" -type f -exec chmod 644 {} +
+rm -rf "${web:?}/$tag"
+mv "$web/.$tag" "$web/$tag"
+# the link swapped in one move, the old version goes after
+ln -sfn "$tag" "$web/.current"
+mv -T "$web/.current" "$web/current"
+for old in "$web"/v*/; do
+  [[ -d $old && $(basename "$old") != "$tag" ]] && rm -rf "$old"
+done
+echo "web version $tag in place"
