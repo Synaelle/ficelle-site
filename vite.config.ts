@@ -9,6 +9,10 @@ export default defineConfig({
   // rest of the address belongs to the sync server
   base: '/site/',
   server: { port: 1430, strictPort: true },
-  build: { target: 'es2022' },
+  build: {
+    target: 'es2022',
+    // the brand page is a page of its own, served at /site/brand/
+    rolldownOptions: { input: { main: 'index.html', brand: 'brand/index.html' } },
+  },
   test: { include: ['src/**/*.test.ts'] },
 })
