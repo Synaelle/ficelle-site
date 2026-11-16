@@ -279,21 +279,14 @@
   .more:hover {
     background: var(--color-accent-pressed);
   }
-  .other {
+  .other,
+  .web {
     padding: var(--space-3) var(--space-5);
     border: 1px solid var(--color-border-strong);
     background: var(--color-surface);
     color: var(--color-text);
   }
-  .other:hover {
-    border-color: var(--color-text-muted);
-  }
-  .web {
-    padding: var(--space-3) var(--space-5);
-    border: 1px solid var(--color-border-strong);
-    background: transparent;
-    color: var(--color-text);
-  }
+  .other:hover,
   .web:hover {
     border-color: var(--color-text-muted);
   }
