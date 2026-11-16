@@ -20,14 +20,6 @@ export const en = {
   diskImage: 'Disk image',
   untested: 'Untested',
   macDetail: (version: string) => `Disk image ${version}, untested`,
-  channel: 'Release channel',
-  stable: 'Stable',
-  beta: 'Beta',
-  betaNote:
-    'The newest build, before it becomes a release. It may have bugs, keep a backup of your notes.',
-  betaNoMac: (version: string) => `The Mac has no beta build, so it stays on ${version}.`,
-  noNewerBeta: (version: string) =>
-    `No beta is newer than the release right now, so the beta is ${version} too.`,
   downloadFrom: 'Download from',
   mirror: 'Mirror',
   githubDown: 'GitHub cannot be reached',

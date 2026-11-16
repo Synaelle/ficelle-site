@@ -24,14 +24,6 @@ export const fr: Messages = {
   diskImage: 'Image disque',
   untested: 'Non testé',
   macDetail: (version: string) => `Image disque ${version}, non testée`,
-  channel: 'Canal de version',
-  stable: 'Stable',
-  beta: 'Bêta',
-  betaNote:
-    'La toute dernière version, avant sa sortie officielle. Elle peut contenir des bugs, gardez une sauvegarde de vos notes.',
-  betaNoMac: (version: string) => `Le Mac n’a pas de version bêta, il reste en ${version}.`,
-  noNewerBeta: (version: string) =>
-    `Aucune bêta n’est plus récente que la version stable pour l’instant, la bêta est donc aussi la ${version}.`,
   downloadFrom: 'Télécharger depuis',
   mirror: 'Miroir',
   githubDown: 'GitHub est injoignable',
