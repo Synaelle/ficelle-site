@@ -10,7 +10,7 @@ export type Seen = System | 'ios' | 'bsd' | 'haiku'
 export const webFirst = (s: Seen | null): boolean => s === 'ios' || s === 'bsd' || s === 'haiku'
 
 /** The web version, notes kept in the visitor's browser. */
-export const WEB_URL = 'https://web.ficelle.synaelle.com'
+export const WEB_URL = 'https://ficelle-web.synaelle.com'
 
 export const REPO = 'https://github.com/Synaelle/ficelle'
 export const LATEST_PAGE = `${REPO}/releases/latest`
