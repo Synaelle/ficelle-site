@@ -1,6 +1,5 @@
 # The website on the server, next to the sync server. The front nginx sends
-# / and /site/ to 127.0.0.1:8090, and all of ficelle-web.synaelle.com, the
-# web version, to the same port.
+# /, /site/ and /web/ (the web version) to 127.0.0.1:8090.
 services:
   site:
     image: ghcr.io/synaelle/ficelle-site:latest
@@ -13,7 +12,7 @@ services:
     # the downloads mirror.sh keeps, served at /site/mirror/
     volumes:
       - ./mirror:/usr/share/nginx/html/site/mirror:ro
-      # the web version mirror.sh unpacks, served on ficelle-web.synaelle.com
+      # the web version mirror.sh unpacks, served at /web/
       - ./web:/usr/share/nginx/web:ro
     cap_drop:
       - ALL

@@ -65,6 +65,27 @@ jobs:
           done
           docker logs check
           exit 1
+      - name: the image serves the web version at /web/ and logs nothing of it
+        run: |
+          set -eu
+          mkdir -p web/v1/assets
+          echo '<title>web</title>' > web/v1/index.html
+          echo 'ok' > web/v1/assets/main.js
+          ln -s v1 web/current
+          docker run -d --name web --read-only --tmpfs /tmp -p 127.0.0.1:8091:8080 \
+            -v "$PWD/web:/usr/share/nginx/web:ro" ghcr.io/synaelle/ficelle-site:${{ github.sha }}
+          sleep 3
+          curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' http://127.0.0.1:8091/web | grep -q '^301 http://127.0.0.1:8091/web/$'
+          curl -fsS -D headers http://127.0.0.1:8091/web/ | grep -q '<title>web</title>'
+          grep -qi "content-security-policy:.*wasm-unsafe-eval" headers
+          curl -fsS -D assets http://127.0.0.1:8091/web/assets/main.js | grep -q ok
+          grep -qi "cache-control: public, max-age=31536000, immutable" assets
+          [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8091/web/missing.js)" = 404 ]
+          curl -fsS -o /dev/null http://127.0.0.1:8091/
+          docker logs web > logs 2>&1
+          docker rm -f web
+          grep -q 'GET / ' logs
+          ! grep -q '/web' logs
       - name: publish
         run: |
           docker push ghcr.io/synaelle/ficelle-site:${{ github.sha }}

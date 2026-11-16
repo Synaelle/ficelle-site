@@ -11,7 +11,7 @@
 # one and only listed once complete, and older versions go after that.
 #
 # Given a second folder, it also keeps the latest release's web version
-# there for ficelle-web.synaelle.com: unpacked into its own folder, checked
+# there for the site's /web/: unpacked into its own folder, checked
 # like the others, then `current` points at it (a link the site container
 # follows, its folder mounted once).
 #
