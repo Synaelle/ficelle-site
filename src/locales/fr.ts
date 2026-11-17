@@ -39,7 +39,7 @@ export const fr: Messages = {
     link: 'Ficelle sur Mac',
     after: '.',
   },
-  linuxNote: 'Des paquets pour l’AUR et Flathub arrivent bientôt.',
+  linuxNote: 'Un paquet pour l’AUR arrive bientôt.',
   iosNote:
     'Il n’y a pas d’application pour iPhone ou iPad, je n’ai aucun appareil Apple pour la tester. Ficelle fonctionne dans Safari à la place, et vos notes restent sur cet appareil. Ajoutez-la à votre écran d’accueil, sinon Safari peut les effacer après une semaine sans visite.',
   noAppNote:
