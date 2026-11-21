@@ -18,7 +18,6 @@ export const en = {
   installer: 'Installer',
   portable: 'Portable',
   diskImage: 'Disk image',
-  untested: 'Untested',
   /** A file that runs on every processor, beside x64 and ARM64. */
   allArchs: 'All',
   downloadFrom: 'Download from',

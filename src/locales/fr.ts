@@ -22,7 +22,6 @@ export const fr: Messages = {
   installer: 'Installateur',
   portable: 'Portable',
   diskImage: 'Image disque',
-  untested: 'Non testé',
   allArchs: 'Tous',
   downloadFrom: 'Télécharger depuis',
   mirror: 'Miroir',
