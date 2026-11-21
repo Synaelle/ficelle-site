@@ -31,7 +31,7 @@ export const en = {
   webMainDetail: 'Nothing to install',
 
   macNote:
-    'The web version is recommended on a Mac, your notes stay on this device. The Mac app is no longer made. Its last version, 0.7.1, untested, is under the other systems.',
+    'The web version is recommended on a Mac. It keeps your notes in this browser, never on a server. The Mac app is no longer made, and its last version, 0.7.1, is under the other systems.',
   linuxNote: 'A package for the AUR is coming soon.',
   iosNote:
     'There is no iPhone or iPad app, I have no Apple device to test one on. Ficelle works in Safari instead, and your notes stay on this device. Add it to your Home Screen, or Safari may delete them after a week away.',

@@ -137,10 +137,11 @@
       lines: [{ arch: 'all', files: [{ kind: 'APK', href: link(files?.apk) }] }],
     },
   ])
-  // the visitor's own system first, the others in their usual order
+  // the visitor's own system first, the others in their usual order; the
+  // Mac app, no longer made, only for a visitor on a Mac
   const rows = $derived([
     ...all.filter((r) => r.system === system),
-    ...all.filter((r) => r.system !== system),
+    ...all.filter((r) => r.system !== system && r.system !== 'mac'),
   ])
   const hasBuild = (s: Seen | null): s is System => s !== null && !webFirst(s)
 
