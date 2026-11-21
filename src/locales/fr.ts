@@ -34,7 +34,7 @@ export const fr: Messages = {
   webMainDetail: 'Rien à installer',
 
   macNote:
-    'Sur Mac, la version web est recommandée, vos notes restent sur cet appareil. L’application Mac n’est plus faite : sa dernière version, 0.7.1, non testée, est dans les autres systèmes.',
+    'Sur Mac, la version web est recommandée, vos notes restent sur cet appareil. L’application Mac n’est plus faite. Sa dernière version, 0.7.1, non testée, est dans les autres systèmes.',
   linuxNote: 'Un paquet pour l’AUR arrive bientôt.',
   iosNote:
     'Il n’y a pas d’application pour iPhone ou iPad, je n’ai aucun appareil Apple pour la tester. Ficelle fonctionne dans Safari à la place, et vos notes restent sur cet appareil. Ajoutez-la à votre écran d’accueil, sinon Safari peut les effacer après une semaine sans visite.',
