@@ -111,7 +111,7 @@ export interface Mirrored {
   stable: Files
 }
 
-/** The same downloads from this server, kept by deploy/mirror.sh every two
+/** The same downloads from this server, kept by its mirror job every two
  * hours, or null when the server has no mirror. */
 export async function mirroredFiles(): Promise<Mirrored | null> {
   try {

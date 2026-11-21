@@ -9,10 +9,10 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-    # the downloads mirror.sh keeps, served at /site/mirror/
+    # the downloads the server's mirror job keeps, served at /site/mirror/
     volumes:
       - ./mirror:/usr/share/nginx/html/site/mirror:ro
-      # the web version mirror.sh unpacks, served at /web/
+      # the web version the mirror job unpacks, served at /web/
       - ./web:/usr/share/nginx/web:ro
     cap_drop:
       - ALL
