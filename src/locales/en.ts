@@ -17,9 +17,6 @@ export const en = {
   otherSystems: 'Other systems',
   installer: 'Installer',
   portable: 'Portable',
-  diskImage: 'Disk image',
-  untested: 'Untested',
-  macDetail: (version: string) => `Disk image ${version}, untested`,
   downloadFrom: 'Download from',
   mirror: 'Mirror',
   githubDown: 'GitHub cannot be reached',
@@ -30,7 +27,8 @@ export const en = {
   webMain: 'Use Ficelle in your browser',
   webMainDetail: 'Nothing to install',
 
-  macNote: { before: 'The Mac app is untested, see ', link: 'Ficelle on a Mac', after: '.' },
+  macNote:
+    'There is no Mac app, I have no Mac to test one on. Ficelle works in your browser instead, and your notes stay on this device.',
   linuxNote: 'A package for the AUR is coming soon.',
   iosNote:
     'There is no iPhone or iPad app, I have no Apple device to test one on. Ficelle works in Safari instead, and your notes stay on this device. Add it to your Home Screen, or Safari may delete them after a week away.',

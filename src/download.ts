@@ -1,24 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Which system the visitor is on, and the files of the latest release for it.
 
-export type System = 'windows' | 'mac' | 'linux' | 'android'
+export type System = 'windows' | 'linux' | 'android'
 /** Where the visitor may be: a system with a build, or one with none where
- * the web version is the way (iOS, the BSDs, Haiku). */
-export type Seen = System | 'ios' | 'bsd' | 'haiku'
+ * the web version is the way (the Mac, iOS, the BSDs, Haiku). */
+export type Seen = System | 'mac' | 'ios' | 'bsd' | 'haiku'
 
 /** The systems with no app, where the page offers the web version first. */
-export const webFirst = (s: Seen | null): boolean => s === 'ios' || s === 'bsd' || s === 'haiku'
+export const webFirst = (s: Seen | null): boolean =>
+  s === 'mac' || s === 'ios' || s === 'bsd' || s === 'haiku'
 
 /** The web version, notes kept in the visitor's browser. */
 export const WEB_URL = 'https://ficelle.synaelle.com/web/'
 
 export const REPO = 'https://github.com/Synaelle/ficelle'
 export const LATEST_PAGE = `${REPO}/releases/latest`
-/** The last release known to have a Mac file: the Mac build is untested and
- * does not hold a release back, so a release may come without one. */
-export const MAC_FALLBACK_VERSION = '0.5.0'
-export const MAC_FALLBACK_DMG = `${REPO}/releases/download/v${MAC_FALLBACK_VERSION}/Ficelle_${MAC_FALLBACK_VERSION}_universal.dmg`
-export const MAC_DOC = `${REPO}/blob/main/docs/mac.md`
 export const OBTAINIUM = `https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/${REPO}`
 
 interface Browser {
@@ -74,7 +70,6 @@ export interface Files {
   portable?: string
   appImage?: string
   apk?: string
-  dmg?: string
 }
 
 interface ReleaseJson {
@@ -92,7 +87,6 @@ export function filesOf(release: ReleaseJson): Files {
     portable: find(/_x64_portable\.exe$/),
     appImage: find(/_amd64\.AppImage$/),
     apk: find(/-android\.apk$/),
-    dmg: find(/_universal\.dmg$/),
   }
 }
 

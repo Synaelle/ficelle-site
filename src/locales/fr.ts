@@ -21,9 +21,6 @@ export const fr: Messages = {
   otherSystems: 'Autres systèmes',
   installer: 'Installateur',
   portable: 'Portable',
-  diskImage: 'Image disque',
-  untested: 'Non testé',
-  macDetail: (version: string) => `Image disque ${version}, non testée`,
   downloadFrom: 'Télécharger depuis',
   mirror: 'Miroir',
   githubDown: 'GitHub est injoignable',
@@ -34,11 +31,8 @@ export const fr: Messages = {
   webMain: 'Utiliser Ficelle dans votre navigateur',
   webMainDetail: 'Rien à installer',
 
-  macNote: {
-    before: 'L’application Mac n’est pas testée, voir ',
-    link: 'Ficelle sur Mac',
-    after: '.',
-  },
+  macNote:
+    'Il n’y a pas d’application Mac, je n’ai pas de Mac pour la tester. Ficelle fonctionne dans votre navigateur à la place, et vos notes restent sur cet appareil.',
   linuxNote: 'Un paquet pour l’AUR arrive bientôt.',
   iosNote:
     'Il n’y a pas d’application pour iPhone ou iPad, je n’ai aucun appareil Apple pour la tester. Ficelle fonctionne dans Safari à la place, et vos notes restent sur cet appareil. Ajoutez-la à votre écran d’accueil, sinon Safari peut les effacer après une semaine sans visite.',

@@ -71,7 +71,6 @@ describe('filesOf', () => {
       portable: 'https://x/Ficelle_0.5.1_x64_portable.exe',
       appImage: 'https://x/Ficelle_0.5.1_amd64.AppImage',
       apk: 'https://x/ficelle-0.5.1-android.apk',
-      dmg: 'https://x/Ficelle_0.5.1_universal.dmg',
     })
   })
 })
