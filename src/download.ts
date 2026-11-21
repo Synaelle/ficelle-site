@@ -55,6 +55,41 @@ export function detectSystem({
   return null
 }
 
+/** The processor the builds are for: x64 (Intel, AMD) or ARM64. */
+export type Arch = 'x64' | 'arm'
+
+/**
+ * What the address or the user agent says: `?arch=arm` to see the page as an
+ * ARM visitor does, else ARM when the user agent names it (Linux browsers
+ * do), else x64, which Windows on ARM also runs.
+ */
+export function detectArch(search: string, userAgent: string): Arch {
+  const asked = new URLSearchParams(search).get('arch')
+  if (asked === 'arm' || asked === 'x64') return asked
+  return /aarch64|arm64|armv8/i.test(userAgent) ? 'arm' : 'x64'
+}
+
+/** ARM as the browser's client hints tell it (Chromium browsers, Windows on
+ * ARM included), null when the browser has no hints or says nothing. */
+export async function hintedArch(): Promise<Arch | null> {
+  const data = (
+    navigator as Navigator & {
+      userAgentData?: {
+        getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }>
+      }
+    }
+  ).userAgentData
+  if (!data?.getHighEntropyValues) return null
+  try {
+    const { architecture } = await data.getHighEntropyValues(['architecture'])
+    if (architecture === 'arm') return 'arm'
+    if (architecture === 'x86') return 'x64'
+    return null
+  } catch {
+    return null
+  }
+}
+
 const SEEN: readonly Seen[] = ['windows', 'mac', 'linux', 'android', 'ios', 'bsd', 'haiku']
 
 /**
@@ -73,6 +108,9 @@ export interface Files {
   installer?: string
   portable?: string
   appImage?: string
+  installerArm?: string
+  portableArm?: string
+  appImageArm?: string
   apk?: string
 }
 
@@ -90,6 +128,9 @@ export function filesOf(release: ReleaseJson): Files {
     installer: find(/_x64-setup\.exe$/),
     portable: find(/_x64_portable\.exe$/),
     appImage: find(/_amd64\.AppImage$/),
+    installerArm: find(/_arm64-setup\.exe$/),
+    portableArm: find(/_arm64_portable\.exe$/),
+    appImageArm: find(/_aarch64\.AppImage$/),
     apk: find(/-android\.apk$/),
   }
 }

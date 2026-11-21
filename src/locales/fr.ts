@@ -23,6 +23,7 @@ export const fr: Messages = {
   portable: 'Portable',
   diskImage: 'Image disque',
   untested: 'Non testé',
+  allArchs: 'Tous',
   downloadFrom: 'Télécharger depuis',
   mirror: 'Miroir',
   githubDown: 'GitHub est injoignable',

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest'
-import { detectSystem, filesOf, systemFromAddress } from './download'
+import { detectArch, detectSystem, filesOf, systemFromAddress } from './download'
 
 const UA = {
   windows:
@@ -60,6 +60,10 @@ describe('filesOf', () => {
         url('Ficelle_0.5.1_x64-setup.exe.sig'),
         url('Ficelle_0.5.1_x64_portable.exe'),
         url('Ficelle_0.5.1_amd64.AppImage'),
+        url('Ficelle_0.5.1_amd64.tar.zst'),
+        url('Ficelle_0.5.1_arm64-setup.exe'),
+        url('Ficelle_0.5.1_arm64_portable.exe'),
+        url('Ficelle_0.5.1_aarch64.AppImage'),
         url('ficelle-0.5.1-android.apk'),
         url('Ficelle_0.5.1_universal.dmg'),
         url('latest.json'),
@@ -70,8 +74,23 @@ describe('filesOf', () => {
       installer: 'https://x/Ficelle_0.5.1_x64-setup.exe',
       portable: 'https://x/Ficelle_0.5.1_x64_portable.exe',
       appImage: 'https://x/Ficelle_0.5.1_amd64.AppImage',
+      installerArm: 'https://x/Ficelle_0.5.1_arm64-setup.exe',
+      portableArm: 'https://x/Ficelle_0.5.1_arm64_portable.exe',
+      appImageArm: 'https://x/Ficelle_0.5.1_aarch64.AppImage',
       apk: 'https://x/ficelle-0.5.1-android.apk',
     })
+  })
+})
+
+describe('detectArch', () => {
+  it('reads ARM from the address or the user agent, x64 otherwise', () => {
+    expect(detectArch('', UA.windows)).toBe('x64')
+    expect(detectArch('', UA.linux)).toBe('x64')
+    expect(
+      detectArch('', 'Mozilla/5.0 (X11; Linux aarch64; rv:144.0) Gecko/20100101 Firefox/144.0'),
+    ).toBe('arm')
+    expect(detectArch('?arch=arm', UA.windows)).toBe('arm')
+    expect(detectArch('?arch=x64', 'Mozilla/5.0 (X11; Linux aarch64)')).toBe('x64')
   })
 })
 

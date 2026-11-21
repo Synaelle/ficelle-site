@@ -1,5 +1,6 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<!-- One button for the visitor's system, an arrow for the others. On a
+<!-- One button for the visitor's system and processor, an arrow for the
+     others, Windows and Linux with a line for x64 and one for ARM64. On a
      system with no app (iOS, the BSDs, Haiku) the main button opens the web
      version, the downloads stay under the arrow. Without a system it can
      tell, it sends to the release page. -->
@@ -11,7 +12,9 @@
   import { slide } from 'svelte/transition'
   import { cubicOut } from 'svelte/easing'
   import {
+    detectArch,
     detectSystem,
+    hintedArch,
     latestFiles,
     LATEST_PAGE,
     MAC_DMG,
@@ -21,6 +24,7 @@
     systemFromAddress,
     WEB_URL,
     webFirst,
+    type Arch,
     type Files,
     type Mirrored,
     type Seen,
@@ -40,6 +44,11 @@
           platform: seen.userAgentData?.platform,
           maxTouchPoints: navigator.maxTouchPoints,
         })
+
+  // the user agent first, the client hints when the browser gives them
+  let arch = $state<Arch>(detectArch(location.search, navigator.userAgent))
+  if (!new URLSearchParams(location.search).has('arch'))
+    hintedArch().then((hinted) => hinted && (arch = hinted))
 
   let fromGithub = $state<Files | null>(null)
   let mirror = $state<Mirrored | null>(null)
@@ -66,37 +75,68 @@
     android: 'Android',
   }
 
-  // one row per system, its files side by side: more packages add buttons, not rows
+  const ARCHS: Record<Arch, string> = { x64: 'x64', arm: 'ARM64' }
+
+  // one row per system, a line of files per processor (All when one file
+  // runs on every one): more packages add buttons, not rows
+  interface Line {
+    arch: Arch | 'all'
+    files: { kind: string; href: string }[]
+  }
   interface Row {
     system: System
     version: string
-    files: { kind: string; href: string }[]
+    lines: Line[]
     untested?: boolean
   }
+  /** The visitor's processor first; ARM once the release has ARM files. */
+  const byArch = (x64: Line['files'], arm: Line['files'] | null): Line[] =>
+    !arm
+      ? [{ arch: 'x64', files: x64 }]
+      : arch === 'arm'
+        ? [
+            { arch: 'arm', files: arm },
+            { arch: 'x64', files: x64 },
+          ]
+        : [
+            { arch: 'x64', files: x64 },
+            { arch: 'arm', files: arm },
+          ]
   const all: Row[] = $derived([
     {
       system: 'windows',
       version,
-      files: [
-        { kind: t.installer, href: link(files?.installer) },
-        { kind: t.portable, href: link(files?.portable) },
-      ],
+      lines: byArch(
+        [
+          { kind: t.installer, href: link(files?.installer) },
+          { kind: t.portable, href: link(files?.portable) },
+        ],
+        files?.installerArm
+          ? [
+              { kind: t.installer, href: link(files.installerArm) },
+              { kind: t.portable, href: link(files.portableArm) },
+            ]
+          : null,
+      ),
     },
     {
       system: 'mac',
       version: MAC_VERSION,
-      files: [{ kind: t.diskImage, href: MAC_DMG }],
+      lines: [{ arch: 'all', files: [{ kind: t.diskImage, href: MAC_DMG }] }],
       untested: true,
     },
     {
       system: 'linux',
       version,
-      files: [{ kind: 'AppImage', href: link(files?.appImage) }],
+      lines: byArch(
+        [{ kind: 'AppImage', href: link(files?.appImage) }],
+        files?.appImageArm ? [{ kind: 'AppImage', href: link(files.appImageArm) }] : null,
+      ),
     },
     {
       system: 'android',
       version,
-      files: [{ kind: 'APK', href: link(files?.apk) }],
+      lines: [{ arch: 'all', files: [{ kind: 'APK', href: link(files?.apk) }] }],
     },
   ])
   // the visitor's own system first, the others in their usual order
@@ -109,9 +149,14 @@
   const main = $derived.by(() => {
     switch (system) {
       case 'windows':
-        return { href: link(files?.installer), detail: `${t.installer} ${version}` }
+        // Windows on ARM runs the x64 build when there is no ARM one
+        return arch === 'arm' && files?.installerArm
+          ? { href: link(files.installerArm), detail: `${t.installer} ${version} · ARM64` }
+          : { href: link(files?.installer), detail: `${t.installer} ${version}` }
       case 'linux':
-        return { href: link(files?.appImage), detail: `AppImage ${version}` }
+        return arch === 'arm'
+          ? { href: link(files?.appImageArm), detail: `AppImage ${version} · ARM64` }
+          : { href: link(files?.appImage), detail: `AppImage ${version}` }
       case 'android':
         return { href: link(files?.apk), detail: `APK ${version}` }
       default:
@@ -193,11 +238,26 @@
               {NAMES[row.system]}
               {#if row.untested}<span class="tag">{t.untested}</span>{/if}
             </span>
-            <span class="files">
-              {#each row.files as file (file.kind)}
-                <a class="file" href={file.href}>
-                  <span class="icon">{@html download}</span>{file.kind}
-                </a>
+            <span class="lines">
+              {#each row.lines as line (line.arch)}
+                <span class="line">
+                  <span class="arch" class:mine={line.arch === arch}
+                    >{line.arch === 'all' ? t.allArchs : ARCHS[line.arch]}</span
+                  >
+                  <span class="files">
+                    {#each line.files as file (file.kind)}
+                      <a
+                        class="file"
+                        href={file.href}
+                        aria-label={line.arch === 'all'
+                          ? undefined
+                          : `${NAMES[row.system]} ${ARCHS[line.arch]} ${file.kind}`}
+                      >
+                        <span class="icon">{@html download}</span>{file.kind}
+                      </a>
+                    {/each}
+                  </span>
+                </span>
               {/each}
             </span>
             <span class="version">{row.version}</span>
@@ -329,7 +389,8 @@
   .item {
     display: grid;
     grid-template-columns: 96px 1fr auto;
-    align-items: center;
+    /* the name and the version on the first line of files */
+    align-items: baseline;
     gap: var(--space-3);
     padding: var(--space-3);
     border-left: 2px solid transparent;
@@ -352,6 +413,25 @@
     border-radius: var(--radius-control);
     color: var(--color-text-muted);
     font-size: 11px;
+    font-weight: 600;
+  }
+  .lines {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .line {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .arch {
+    min-width: 6ch;
+    color: var(--color-text-faint);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .arch.mine {
+    color: var(--color-text-muted);
     font-weight: 600;
   }
   .files {
@@ -452,8 +532,22 @@
     .menu {
       width: 100%;
     }
+    /* the version under the name, the files get the width */
     .item {
-      grid-template-columns: 80px 1fr auto;
+      grid-template-columns: 80px 1fr;
+    }
+    .version {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .lines {
+      grid-row: span 2;
+    }
+    /* each processor's name above its files */
+    .line {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
     }
     .note {
       justify-self: center;
