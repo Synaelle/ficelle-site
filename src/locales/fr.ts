@@ -21,6 +21,8 @@ export const fr: Messages = {
   otherSystems: 'Autres systèmes',
   installer: 'Installateur',
   portable: 'Portable',
+  diskImage: 'Image disque',
+  untested: 'Non testé',
   downloadFrom: 'Télécharger depuis',
   mirror: 'Miroir',
   githubDown: 'GitHub est injoignable',
@@ -32,7 +34,7 @@ export const fr: Messages = {
   webMainDetail: 'Rien à installer',
 
   macNote:
-    'Il n’y a pas d’application Mac, je n’ai pas de Mac pour la tester. Ficelle fonctionne dans votre navigateur à la place, et vos notes restent sur cet appareil.',
+    'Sur Mac, la version web est recommandée, vos notes restent sur cet appareil. L’application Mac n’est plus faite : sa dernière version, 0.7.1, non testée, est dans les autres systèmes.',
   linuxNote: 'Un paquet pour l’AUR arrive bientôt.',
   iosNote:
     'Il n’y a pas d’application pour iPhone ou iPad, je n’ai aucun appareil Apple pour la tester. Ficelle fonctionne dans Safari à la place, et vos notes restent sur cet appareil. Ajoutez-la à votre écran d’accueil, sinon Safari peut les effacer après une semaine sans visite.',

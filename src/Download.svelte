@@ -14,6 +14,8 @@
     detectSystem,
     latestFiles,
     LATEST_PAGE,
+    MAC_DMG,
+    MAC_VERSION,
     mirroredFiles,
     OBTAINIUM,
     systemFromAddress,
@@ -59,6 +61,7 @@
 
   const NAMES: Record<System, string> = {
     windows: 'Windows',
+    mac: 'macOS',
     linux: 'Linux',
     android: 'Android',
   }
@@ -68,6 +71,7 @@
     system: System
     version: string
     files: { kind: string; href: string }[]
+    untested?: boolean
   }
   const all: Row[] = $derived([
     {
@@ -77,6 +81,12 @@
         { kind: t.installer, href: link(files?.installer) },
         { kind: t.portable, href: link(files?.portable) },
       ],
+    },
+    {
+      system: 'mac',
+      version: MAC_VERSION,
+      files: [{ kind: t.diskImage, href: MAC_DMG }],
+      untested: true,
     },
     {
       system: 'linux',
@@ -181,6 +191,7 @@
           <li class="item" class:current={row.system === system}>
             <span class="system">
               {NAMES[row.system]}
+              {#if row.untested}<span class="tag">{t.untested}</span>{/if}
             </span>
             <span class="files">
               {#each row.files as file (file.kind)}
@@ -334,6 +345,14 @@
     justify-items: start;
     gap: 2px;
     font-weight: 700;
+  }
+  .tag {
+    padding: 0 var(--space-1);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: 600;
   }
   .files {
     display: flex;
