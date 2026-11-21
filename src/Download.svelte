@@ -1,10 +1,12 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <!-- One button for the visitor's system and processor, an arrow for the
-     others, Windows and Linux with a line for x64 and one for ARM64. On a
+     others. A file built for both processors carries a chip that picks one,
+     set at first to the visitor's. On a
      system with no app (iOS, the BSDs, Haiku) the main button opens the web
      version, the downloads stay under the arrow. Without a system it can
      tell, it sends to the release page. -->
 <script lang="ts">
+  import check from 'lucide-static/icons/check.svg?raw'
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
   import download from 'lucide-static/icons/download.svg?raw'
   import globe from 'lucide-static/icons/globe.svg?raw'
@@ -77,66 +79,62 @@
 
   const ARCHS: Record<Arch, string> = { x64: 'x64', arm: 'ARM64' }
 
-  // one row per system, a line of files per processor (All when one file
-  // runs on every one): more packages add buttons, not rows
-  interface Line {
-    arch: Arch | 'all'
-    files: { kind: string; href: string }[]
+  // one row per system, its files side by side: more packages add buttons,
+  // not rows. A file with an ARM build has a second address
+  interface File {
+    id: string
+    kind: string
+    href: string
+    arm?: string
   }
   interface Row {
     system: System
     version: string
-    lines: Line[]
+    files: File[]
   }
-  /** The visitor's processor first; ARM once the release has ARM files. */
-  const byArch = (x64: Line['files'], arm: Line['files'] | null): Line[] =>
-    !arm
-      ? [{ arch: 'x64', files: x64 }]
-      : arch === 'arm'
-        ? [
-            { arch: 'arm', files: arm },
-            { arch: 'x64', files: x64 },
-          ]
-        : [
-            { arch: 'x64', files: x64 },
-            { arch: 'arm', files: arm },
-          ]
   const all: Row[] = $derived([
     {
       system: 'windows',
       version,
-      lines: byArch(
-        [
-          { kind: t.installer, href: link(files?.installer) },
-          { kind: t.portable, href: link(files?.portable) },
-        ],
-        files?.installerArm
-          ? [
-              { kind: t.installer, href: link(files.installerArm) },
-              { kind: t.portable, href: link(files.portableArm) },
-            ]
-          : null,
-      ),
+      files: [
+        {
+          id: 'installer',
+          kind: t.installer,
+          href: link(files?.installer),
+          arm: files?.installerArm,
+        },
+        { id: 'portable', kind: t.portable, href: link(files?.portable), arm: files?.portableArm },
+      ],
     },
     {
       system: 'mac',
       version: MAC_VERSION,
-      lines: [{ arch: 'all', files: [{ kind: t.diskImage, href: MAC_DMG }] }],
+      files: [{ id: 'dmg', kind: t.diskImage, href: MAC_DMG }],
     },
     {
       system: 'linux',
       version,
-      lines: byArch(
-        [{ kind: 'AppImage', href: link(files?.appImage) }],
-        files?.appImageArm ? [{ kind: 'AppImage', href: link(files.appImageArm) }] : null,
-      ),
+      files: [
+        { id: 'appimage', kind: 'AppImage', href: link(files?.appImage), arm: files?.appImageArm },
+      ],
     },
     {
       system: 'android',
       version,
-      lines: [{ arch: 'all', files: [{ kind: 'APK', href: link(files?.apk) }] }],
+      files: [{ id: 'apk', kind: 'APK', href: link(files?.apk) }],
     },
   ])
+
+  // the processor each file's chip is on, the visitor's until changed
+  let picked = $state<Record<string, Arch>>({})
+  let choosing = $state<string | null>(null)
+  const chosen = (file: File): Arch => picked[file.id] ?? arch
+  function pick(file: File, value: Arch) {
+    picked[file.id] = value
+    choosing = null
+    document.getElementById(`chip-${file.id}`)?.focus()
+  }
+
   // the visitor's own system first, the others in their usual order; the
   // Mac app, no longer made, only for a visitor on a Mac
   const rows = $derived([
@@ -163,6 +161,18 @@
     }
   })
 </script>
+
+<svelte:window
+  onclick={(e) => {
+    if (choosing && !(e.target as Element).closest('.chooser')) choosing = null
+  }}
+  onkeydown={(e) => {
+    if (e.key === 'Escape' && choosing) {
+      document.getElementById(`chip-${choosing}`)?.focus()
+      choosing = null
+    }
+  }}
+/>
 
 <div class="download">
   <div class="row">
@@ -236,26 +246,51 @@
             <span class="system">
               {NAMES[row.system]}
             </span>
-            <span class="lines">
-              {#each row.lines as line (line.arch)}
-                <span class="line">
-                  <span class="arch" class:mine={line.arch === arch}
-                    >{line.arch === 'all' ? t.allArchs : ARCHS[line.arch]}</span
-                  >
-                  <span class="files">
-                    {#each line.files as file (file.kind)}
-                      <a
-                        class="file"
-                        href={file.href}
-                        aria-label={line.arch === 'all'
-                          ? undefined
-                          : `${NAMES[row.system]} ${ARCHS[line.arch]} ${file.kind}`}
+            <span class="files">
+              {#each row.files as file (file.id)}
+                {#if file.arm}
+                  <span class="pair">
+                    <a
+                      class="file"
+                      href={chosen(file) === 'arm' ? file.arm : file.href}
+                      aria-label={`${NAMES[row.system]} ${file.kind} ${ARCHS[chosen(file)]}`}
+                    >
+                      <span class="icon">{@html download}</span>{file.kind}
+                    </a>
+                    <span class="chooser">
+                      <button
+                        id="chip-{file.id}"
+                        class="chip"
+                        class:other={chosen(file) !== arch}
+                        aria-haspopup="menu"
+                        aria-expanded={choosing === file.id}
+                        aria-label={`${t.processor}, ${ARCHS[chosen(file)]}`}
+                        onclick={() => (choosing = choosing === file.id ? null : file.id)}
                       >
-                        <span class="icon">{@html download}</span>{file.kind}
-                      </a>
-                    {/each}
+                        {ARCHS[chosen(file)]}<span class="icon">{@html chevron}</span>
+                      </button>
+                      {#if choosing === file.id}
+                        <span class="choices" role="menu" aria-label={t.processor}>
+                          {#each ['x64', 'arm'] as const as value (value)}
+                            <button
+                              role="menuitemradio"
+                              aria-checked={chosen(file) === value}
+                              onclick={() => pick(file, value)}
+                            >
+                              {ARCHS[value]}
+                              {#if chosen(file) === value}<span class="icon">{@html check}</span
+                                >{/if}
+                            </button>
+                          {/each}
+                        </span>
+                      {/if}
+                    </span>
                   </span>
-                </span>
+                {:else}
+                  <a class="file" href={file.href}>
+                    <span class="icon">{@html download}</span>{file.kind}
+                  </a>
+                {/if}
               {/each}
             </span>
             <span class="version">{row.version}</span>
@@ -371,7 +406,7 @@
   }
 
   .menu {
-    width: min(480px, 100%);
+    width: min(520px, 100%);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-popover);
     background: var(--color-surface);
@@ -387,8 +422,7 @@
   .item {
     display: grid;
     grid-template-columns: 96px 1fr auto;
-    /* the name and the version on the first line of files */
-    align-items: baseline;
+    align-items: center;
     gap: var(--space-3);
     padding: var(--space-3);
     border-left: 2px solid transparent;
@@ -405,24 +439,85 @@
     gap: 2px;
     font-weight: 700;
   }
-  .lines {
-    display: grid;
-    gap: var(--space-2);
-  }
-  .line {
+  .pair {
     display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
   }
-  .arch {
-    min-width: 6ch;
-    color: var(--color-text-faint);
+  .pair .file {
+    border-radius: var(--radius-control) 0 0 var(--radius-control);
+  }
+  .chooser {
+    position: relative;
+    display: flex;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-left: none;
+    border-radius: 0 var(--radius-control) var(--radius-control) 0;
+    background: var(--color-surface-2);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .chip.other,
+  .chip[aria-expanded='true'] {
+    color: var(--color-text);
+  }
+  .chip:hover,
+  .chip:focus-visible {
+    border-color: var(--color-accent);
+  }
+  .chip .icon :global(svg) {
+    width: 12px;
+    height: 12px;
+  }
+  .choices {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    right: 0;
+    z-index: 2;
+    display: grid;
+    min-width: 112px;
+    padding: var(--space-1);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-popover);
+    background: var(--color-surface-2);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  }
+  .choices button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--color-text-muted);
     font-family: var(--font-mono);
     font-size: 12px;
+    text-align: left;
+    cursor: pointer;
   }
-  .arch.mine {
-    color: var(--color-text-muted);
-    font-weight: 600;
+  .choices button[aria-checked='true'] {
+    color: var(--color-text);
+  }
+  .choices button:hover,
+  .choices button:focus-visible {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+  .choices .icon {
+    color: var(--color-accent);
+  }
+  .choices .icon :global(svg) {
+    width: 14px;
+    height: 14px;
   }
   .files {
     display: flex;
@@ -530,14 +625,8 @@
       grid-column: 1;
       grid-row: 2;
     }
-    .lines {
+    .files {
       grid-row: span 2;
-    }
-    /* each processor's name above its files */
-    .line {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-1);
     }
     .note {
       justify-self: center;

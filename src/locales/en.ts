@@ -18,8 +18,8 @@ export const en = {
   installer: 'Installer',
   portable: 'Portable',
   diskImage: 'Disk image',
-  /** A file that runs on every processor, beside x64 and ARM64. */
-  allArchs: 'All',
+  /** Names the x64 or ARM64 choice on a download. */
+  processor: 'Processor',
   downloadFrom: 'Download from',
   mirror: 'Mirror',
   githubDown: 'GitHub cannot be reached',
