@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Which system the visitor is on, and the files of the latest release for it.
 
-export type System = 'windows' | 'mac' | 'linux' | 'android'
+export type System = 'windows' | 'linux' | 'android'
 /** Where the visitor may be: a system with a build, or one with none where
- * the web version is the way (iOS, the BSDs, Haiku). */
-export type Seen = System | 'ios' | 'bsd' | 'haiku'
+ * the web version is the way (the Mac, iOS, the BSDs, Haiku). */
+export type Seen = System | 'mac' | 'ios' | 'bsd' | 'haiku'
 
-/** The systems where the page offers the web version first: no app, or the
- * Mac's, which is no longer made. */
+/** The systems with no app, where the page offers the web version first. */
 export const webFirst = (s: Seen | null): boolean =>
   s === 'mac' || s === 'ios' || s === 'bsd' || s === 'haiku'
 
@@ -16,9 +15,6 @@ export const WEB_URL = 'https://ficelle.synaelle.com/web/'
 
 export const REPO = 'https://github.com/Synaelle/ficelle'
 export const LATEST_PAGE = `${REPO}/releases/latest`
-/** The last Mac app, untested: no later release has one. */
-export const MAC_VERSION = '0.7.1'
-export const MAC_DMG = `${REPO}/releases/download/v${MAC_VERSION}/Ficelle_${MAC_VERSION}_universal.dmg`
 export const OBTAINIUM = `https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/${REPO}`
 
 interface Browser {

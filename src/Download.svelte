@@ -19,8 +19,6 @@
     hintedArch,
     latestFiles,
     LATEST_PAGE,
-    MAC_DMG,
-    MAC_VERSION,
     mirroredFiles,
     OBTAINIUM,
     systemFromAddress,
@@ -72,7 +70,6 @@
 
   const NAMES: Record<System, string> = {
     windows: 'Windows',
-    mac: 'macOS',
     linux: 'Linux',
     android: 'Android',
   }
@@ -107,11 +104,6 @@
       ],
     },
     {
-      system: 'mac',
-      version: MAC_VERSION,
-      files: [{ id: 'dmg', kind: t.diskImage, href: MAC_DMG }],
-    },
-    {
       system: 'linux',
       version,
       files: [
@@ -135,11 +127,10 @@
     document.getElementById(`chip-${file.id}`)?.focus()
   }
 
-  // the visitor's own system first, the others in their usual order; the
-  // Mac app, no longer made, only for a visitor on a Mac
+  // the visitor's own system first, the others in their usual order
   const rows = $derived([
     ...all.filter((r) => r.system === system),
-    ...all.filter((r) => r.system !== system && r.system !== 'mac'),
+    ...all.filter((r) => r.system !== system),
   ])
   const hasBuild = (s: Seen | null): s is System => s !== null && !webFirst(s)
 
@@ -226,13 +217,9 @@
     {/if}
   </div>
 
-  {#if system === 'mac'}
-    <p class="note">{t.macNote}</p>
-  {:else if system === 'linux'}
-    <p class="note">{t.linuxNote}</p>
-  {:else if system === 'ios'}
+  {#if system === 'ios'}
     <p class="note">{t.iosNote}</p>
-  {:else if system === 'bsd' || system === 'haiku'}
+  {:else if system === 'mac' || system === 'bsd' || system === 'haiku'}
     <p class="note">{t.noAppNote}</p>
   {:else if !system}
     <p class="note">{t.unknownNote}</p>
