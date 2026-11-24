@@ -17,6 +17,12 @@ export const en = {
   otherSystems: 'Other systems',
   installer: 'Installer',
   portable: 'Portable',
+  archPackage: 'Arch package',
+  /** The button that shows the command installing the Arch package. */
+  archCommand: 'Install command',
+  copy: 'Copy',
+  copied: 'Copied',
+  copyFailed: 'Could not copy. Select the command to copy it.',
   /** Names the x64 or ARM64 choice on a download. */
   processor: 'Processor',
   downloadFrom: 'Download from',

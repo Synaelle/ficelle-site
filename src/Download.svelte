@@ -4,10 +4,13 @@
      set at first to the visitor's. On a
      system with no app (iOS, the BSDs, Haiku) the main button opens the web
      version, the downloads stay under the arrow. Without a system it can
-     tell, it sends to the release page. -->
+     tell, it sends to the release page. The Arch package has a question
+     mark beside it that shows the command installing it, to copy. -->
 <script lang="ts">
   import check from 'lucide-static/icons/check.svg?raw'
   import chevron from 'lucide-static/icons/chevron-down.svg?raw'
+  import copy from 'lucide-static/icons/copy.svg?raw'
+  import help from 'lucide-static/icons/circle-help.svg?raw'
   import download from 'lucide-static/icons/download.svg?raw'
   import globe from 'lucide-static/icons/globe.svg?raw'
   import obtainium from './obtainium.svg?raw'
@@ -21,6 +24,7 @@
     LATEST_PAGE,
     mirroredFiles,
     OBTAINIUM,
+    pacmanCommand,
     systemFromAddress,
     WEB_URL,
     webFirst,
@@ -77,12 +81,14 @@
   const ARCHS: Record<Arch, string> = { x64: 'x64', arm: 'ARM64' }
 
   // one row per system, its files side by side: more packages add buttons,
-  // not rows. A file with an ARM build has a second address
+  // not rows. A file with an ARM build has a second address, one installed
+  // from a terminal has its command
   interface File {
     id: string
     kind: string
     href: string
     arm?: string
+    command?: string
   }
   interface Row {
     system: System
@@ -108,6 +114,12 @@
       version,
       files: [
         { id: 'appimage', kind: 'AppImage', href: link(files?.appImage), arm: files?.appImageArm },
+        {
+          id: 'arch',
+          kind: t.archPackage,
+          href: link(files?.archPackage),
+          command: version ? pacmanCommand(version) : undefined,
+        },
       ],
     },
     {
@@ -125,6 +137,22 @@
     picked[file.id] = value
     choosing = null
     document.getElementById(`chip-${file.id}`)?.focus()
+  }
+
+  // the file whose command shows, and whether it was just copied
+  let showing = $state<string | null>(null)
+  let copied = $state<'yes' | 'failed' | null>(null)
+  let copiedTimer: ReturnType<typeof setTimeout> | undefined
+  const shown = (row: Row) => row.files.find((f) => f.id === showing && f.command)
+  async function copyCommand(command: string) {
+    clearTimeout(copiedTimer)
+    try {
+      await navigator.clipboard.writeText(command)
+      copied = 'yes'
+      copiedTimer = setTimeout(() => (copied = null), 2000)
+    } catch {
+      copied = 'failed'
+    }
   }
 
   // the visitor's own system first, the others in their usual order
@@ -273,6 +301,23 @@
                       {/if}
                     </span>
                   </span>
+                {:else if file.command}
+                  <span class="pair">
+                    <a class="file" href={file.href}>
+                      <span class="icon">{@html download}</span>{file.kind}
+                    </a>
+                    <button
+                      class="chip help"
+                      aria-expanded={showing === file.id}
+                      aria-controls="command-{file.id}"
+                      aria-label={`${file.kind}, ${t.archCommand}`}
+                      title={t.archCommand}
+                      onclick={() => {
+                        showing = showing === file.id ? null : file.id
+                        copied = null
+                      }}><span class="icon">{@html help}</span></button
+                    >
+                  </span>
                 {:else}
                   <a class="file" href={file.href}>
                     <span class="icon">{@html download}</span>{file.kind}
@@ -281,6 +326,23 @@
               {/each}
             </span>
             <span class="version">{row.version}</span>
+            {#if shown(row)?.command}
+              {@const file = shown(row)!}
+              <div
+                id="command-{file.id}"
+                class="command"
+                role="group"
+                aria-label={t.archCommand}
+                transition:slide={opening}
+              >
+                <code>{file.command}</code>
+                <button class="copy" onclick={() => void copyCommand(file.command!)}>
+                  <span class="icon">{@html copied === 'yes' ? check : copy}</span>
+                  {copied === 'yes' ? t.copied : t.copy}
+                </button>
+                {#if copied === 'failed'}<p class="failed" role="alert">{t.copyFailed}</p>{/if}
+              </div>
+            {/if}
           </li>
         {/each}
       </ul>
@@ -462,6 +524,57 @@
   .chip .icon :global(svg) {
     width: 12px;
     height: 12px;
+  }
+  .chip.help .icon :global(svg) {
+    width: 15px;
+    height: 15px;
+  }
+  .command {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface-2);
+  }
+  .command code {
+    flex: 1 1 16em;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+  .copy {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .copy:hover,
+  .copy:focus-visible {
+    border-color: var(--color-accent);
+  }
+  .copy .icon :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+  .failed {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 13px;
   }
   .choices {
     position: absolute;

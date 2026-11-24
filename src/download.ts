@@ -107,6 +107,7 @@ export interface Files {
   installerArm?: string
   portableArm?: string
   appImageArm?: string
+  archPackage?: string
   apk?: string
 }
 
@@ -127,9 +128,15 @@ export function filesOf(release: ReleaseJson): Files {
     installerArm: find(/_arm64-setup\.exe$/),
     portableArm: find(/_arm64_portable\.exe$/),
     appImageArm: find(/_aarch64\.AppImage$/),
+    archPackage: find(/_x86_64\.pkg\.tar\.zst$/),
     apk: find(/-android\.apk$/),
   }
 }
+
+/** The command that installs the Arch package of `version` once
+ * downloaded, the browser's Downloads folder assumed. */
+export const pacmanCommand = (version: string): string =>
+  `sudo pacman -U ~/Downloads/Ficelle_${version}_x86_64.pkg.tar.zst`
 
 /** The latest release's files, or null when GitHub cannot be reached. */
 export async function latestFiles(): Promise<Files | null> {

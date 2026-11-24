@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest'
-import { detectArch, detectSystem, filesOf, systemFromAddress } from './download'
+import { detectArch, detectSystem, filesOf, pacmanCommand, systemFromAddress } from './download'
 
 const UA = {
   windows:
@@ -64,6 +64,8 @@ describe('filesOf', () => {
         url('Ficelle_0.5.1_arm64-setup.exe'),
         url('Ficelle_0.5.1_arm64_portable.exe'),
         url('Ficelle_0.5.1_aarch64.AppImage'),
+        url('Ficelle_0.5.1_x86_64.pkg.tar.zst'),
+        url('Ficelle_0.5.1_x86_64.pkg.tar.zst.sig'),
         url('ficelle-0.5.1-android.apk'),
         url('Ficelle_0.5.1_universal.dmg'),
         url('latest.json'),
@@ -77,6 +79,7 @@ describe('filesOf', () => {
       installerArm: 'https://x/Ficelle_0.5.1_arm64-setup.exe',
       portableArm: 'https://x/Ficelle_0.5.1_arm64_portable.exe',
       appImageArm: 'https://x/Ficelle_0.5.1_aarch64.AppImage',
+      archPackage: 'https://x/Ficelle_0.5.1_x86_64.pkg.tar.zst',
       apk: 'https://x/ficelle-0.5.1-android.apk',
     })
   })
@@ -102,5 +105,13 @@ describe('systemFromAddress', () => {
     expect(systemFromAddress('?os=none')).toBeNull()
     expect(systemFromAddress('?os=amiga')).toBeNull()
     expect(systemFromAddress('')).toBeUndefined()
+  })
+})
+
+describe('pacmanCommand', () => {
+  it('installs the version from Downloads', () => {
+    expect(pacmanCommand('0.9.0')).toBe(
+      'sudo pacman -U ~/Downloads/Ficelle_0.9.0_x86_64.pkg.tar.zst',
+    )
   })
 })
